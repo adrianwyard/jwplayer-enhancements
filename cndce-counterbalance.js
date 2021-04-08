@@ -1,7 +1,7 @@
 (() => {
 
 	var player = jwplayer("myElement").setup({
-	    playlist: "./testrss.json",
+	    playlist: "./playlist-dvj.xml",
 	   	allowfullscreen: "true",
 		// repeat: "list",
 		preload: "auto",
