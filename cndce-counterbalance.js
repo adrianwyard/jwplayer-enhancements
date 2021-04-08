@@ -72,7 +72,11 @@
 			}
 			
 		}else if(position < currPlaylist.sources[0].starttime - 2){
-			player.playlistItem(iPlaylist - 1);
+			if(iPlaylist == 0){
+				player.seek(currPlaylist.sources[0].starttime);
+			}else{
+				player.playlistItem(iPlaylist - 1);
+			}
 		}
 	})
 
