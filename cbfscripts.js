@@ -16,7 +16,7 @@
 			(() => { 
 
 				var player = jwplayer("myElement").setup({
-				    playlist: "./" + ctfarr[1] + "/" + ctfarr[2] + "-dvj.xml", // The final version will prefix urls with "https://www.counterbalance.net/"
+				    playlist: "/" + ctfarr[1] + "/" + ctfarr[2] + "-dvj.xml", // The final version will prefix urls with "https://www.counterbalance.net/"
 				   	allowfullscreen: "true",
 					// repeat: "list",
 					preload: "auto",
