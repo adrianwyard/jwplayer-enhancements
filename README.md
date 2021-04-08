@@ -50,7 +50,8 @@ The video player is added to each page when needed using a JavaScript function c
 Once we have a player working we should confirm it works using the `mediaWindowHtml()` function.
 
 
-> _**Notes from Adrian:** I’ve already created a simple version of the new mediaWindowHtml function that is loaded from [https://counterbalance.net/scripts/cbfscripts2.js](https://counterbalance.net/scripts/cbfscripts2.js), and a test page that uses it: [https://www.counterbalance.org/test/playertest1.html](https://www.counterbalance.org/test/playertest1.html)._
+> _**Notes from Adrian:** Here's an initial deployment test (not yet working) https://adrianwyard.github.io/jwplayer-enhancements/testdir/deploytest.html
+> I’ve already created a simple version of the new mediaWindowHtml function that is loaded from [https://counterbalance.net/scripts/cbfscripts2.js](https://counterbalance.net/scripts/cbfscripts2.js), and a test page that uses it: [https://www.counterbalance.org/test/playertest1.html](https://www.counterbalance.org/test/playertest1.html)._
 
 ---
 HLS Streaming from counterbalance.org (updated 6Apr21)
