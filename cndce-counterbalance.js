@@ -8,6 +8,8 @@
 		modes: [{ type: 'html5' }]
 	});
 
+	var playlist;
+
 	var playerContainer;
 	var sliderContainer;
 
@@ -44,26 +46,37 @@
 
 	})
 
+	player.on('playlist', function(_playlist){
+		// Update global playlist reference when playlist changes
+		playlist = _playlist.playlist;
+		
+	})
 
 
-	player.on('time', function({position}){
+
+	player.on('time seek', function({position, offset}){
 		var currPlaylist = player.getPlaylistItem();
 		var iPlaylist = player.getPlaylistIndex();
 
-		document.getElementById('test').append(currPlaylist.end + ' ' + position + 'TEST');
-		document.getElementById('test').append(document.createElement('br'));
+		// Used when seek is triggered
+		if(offset)
+			position = offset;
 
 
 		if(position > currPlaylist.end){
-			player.next();
+			if(iPlaylist == playlist.length - 1){
+				player.seek(currPlaylist.sources[0].starttime);
+				player.stop();
+			}else{
+				player.next();
+			}
+			
 		}else if(position < currPlaylist.sources[0].starttime - 2){
 			player.playlistItem(iPlaylist - 1);
 		}
 	})
 
 	player.on('playlistItem', function({index, item}){
-		console.log('test');
-
 		// Ensure playlist always follows starttime
 		player.seek(item.sources[0].starttime);
 
