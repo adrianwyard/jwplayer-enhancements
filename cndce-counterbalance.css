@@ -37,3 +37,7 @@
 #myElement.jw-state-buffering .jw-knob{
 	opacity: 0;
 }
+
+#myElement .jw-related-btn{
+	display: none;
+}
