@@ -25,9 +25,11 @@
 		// Add additional rail elements
 		domPreviousRail = document.createElement('div');
 		domPreviousRail.classList.add('cndce-prev-rail');
+		domPreviousRail.classList.add('cndce-rail');
 
 		domNextRail = document.createElement('div');
 		domNextRail.classList.add('cndce-next-rail');
+		domNextRail.classList.add('cndce-rail');
 
 		sliderContainer.prepend(domNextRail);
 		sliderContainer.prepend(domPreviousRail)

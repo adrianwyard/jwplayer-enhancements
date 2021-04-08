@@ -1,13 +1,18 @@
-.cndce-prev-rail,
-.cndce-next-rail{
+.cndce-rail{
 	position: absolute;
 	height: 100%;
 	z-index: 10;
-	top: 0;
+	top: 50%;
 	bottom: 0;
 	background: black;
-	transition: opacity 0.3s ease-in-out;
+	transform: translate(0, -50%);
+	transition: transform 150ms ease-in-out, -webkit-transform 150ms ease-in-out;;
 	opacity: 1;
+}
+
+.jw-slider-time:hover .cndce-rail,
+.jw-slider-time:focus .cndce-rail{
+	transform: translate(0, -50%) scaleY(1.1);
 }
 
 #myElement .jw-slider-container{
