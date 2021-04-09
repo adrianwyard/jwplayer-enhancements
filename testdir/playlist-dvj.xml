@@ -5,6 +5,13 @@
 		"end": 1124.7
 	},
 	{
+		"file": "https://cdn.jwplayer.com/manifests/y5Kg38Sm.m3u8"
+	},
+	{
+		"file": "https://cdn.jwplayer.com/manifests/ye7G5s6Q.m3u8",
+		"starttime": 1254
+	},
+	{
 		"file": "https://cdn.jwplayer.com/manifests/oLt0U0eN.m3u8",
 		"starttime": 1348,
 		"end": 1426
