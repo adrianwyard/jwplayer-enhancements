@@ -12,6 +12,12 @@
 		"starttime": 1254
 	},
 	{
+		"file": "https://s3.amazonaws.com/counterbalance-video/haq.m4v"
+	},
+	{
+		"file": "https://s3.amazonaws.com/counterbalance-video/tedpg.mp3"
+	},
+	{
 		"file": "https://cdn.jwplayer.com/manifests/oLt0U0eN.m3u8",
 		"starttime": 1348,
 		"end": 1426
