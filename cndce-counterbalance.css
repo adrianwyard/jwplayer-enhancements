@@ -1,3 +1,16 @@
+.cndce-rail-block{
+	position: absolute;
+	height: 17px;
+	top: 0;
+	z-index: 10;
+	cursor: pointer;
+}
+
+.cndce-rail-block-prev{
+	left: 0;
+}
+
+
 .cndce-rail{
 	position: absolute;
 	height: 100%;
@@ -9,20 +22,25 @@
 	transition: transform 150ms ease-in-out, -webkit-transform 150ms ease-in-out;;
 	opacity: 1;
 }
-
+#myElement.next-block-hover .cndce-next-rail,
+#myElement.prev-block-hover .cndce-prev-rail,
 .jw-slider-time:hover .cndce-rail,
 .jw-slider-time:focus .cndce-rail{
-	transform: translate(0, -50%) scaleY(1.1);
+	transform: translate(0, -50%) scaleY(1.2);
 }
 
-#myElement .jw-slider-container{
+/* #myElement .jw-slider-container{
 	transition: opacity 0.3s ease-in-out;
-}
+} */
 
 /*#myElement.jw-state-buffering .cndce-prev-rail,
 #myElement.jw-state-buffering .cndce-next-rail,*/
-#myElement.jw-state-buffering .jw-slider-container{
+/* #myElement.jw-state-buffering .jw-slider-container{
 	opacity: 0;
+} */
+
+#myElement.jw-state-buffering .jw-knob{
+	display: none;
 }
 
 .cndce-prev-rail{

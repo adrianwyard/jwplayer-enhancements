@@ -13,9 +13,12 @@
 	var playlist;
 
 	var playerContainer;
+	var controlBarContainer;
 	var sliderContainer;
 
+	var domPreviousRailBlock;
 	var domPreviousRail;
+	var domNextRailBlock;
 	var domNextRail;
 
 	var isSeeking = false;
@@ -23,7 +26,42 @@
 	// Initialize DOM elements
 	player.on('ready', function(){
 		playerContainer = document.getElementById('myElement');
-		sliderContainer = playerContainer.querySelector('.jw-slider-container');
+		controlBarContainer = playerContainer.querySelector('.jw-controlbar');
+		sliderContainer = controlBarContainer.querySelector('.jw-slider-container');
+
+		// Add slider block
+		domPreviousRailBlock = document.createElement('div');
+		domPreviousRailBlock.classList.add('cndce-rail-block');
+		domPreviousRailBlock.classList.add('cndce-rail-block-prev');
+
+		domPreviousRailBlock.onmouseenter = function (){
+			playerContainer.classList.add('prev-block-hover');
+		}
+		domPreviousRailBlock.onmouseleave = function(){
+			playerContainer.classList.remove('prev-block-hover');
+		}
+		domPreviousRailBlock.onclick = function(){
+			isSeeking = true;
+			player.playlistPrev();
+		}
+
+		domNextRailBlock = document.createElement('div');
+		domNextRailBlock.classList.add('cndce-rail-block');
+		domNextRailBlock.classList.add('cndce-rail-block-next');
+
+		domNextRailBlock.onmouseenter = function (){
+			playerContainer.classList.add('next-block-hover');
+		}
+		domNextRailBlock.onmouseleave = function(){
+			playerContainer.classList.remove('next-block-hover');
+		}
+		domNextRailBlock.onclick = function(){
+			isSeeking = true;
+			player.playlistNext();
+		}
+
+		controlBarContainer.prepend(domPreviousRailBlock);
+		controlBarContainer.prepend(domNextRailBlock);
 
 		// Add additional rail elements
 		domPreviousRail = document.createElement('div');
@@ -36,6 +74,7 @@
 
 		sliderContainer.prepend(domNextRail);
 		sliderContainer.prepend(domPreviousRail)
+
 	})
 
 	player.on('meta', function(meta){
@@ -50,7 +89,17 @@
 			domNextRail.style.width = (1 - (currPlaylist.end / meta.seekRange.end)) * 100 + '%';
 
 
+			// Blocks
+			domPreviousRailBlock.style.width = (sliderContainer.offsetLeft + domPreviousRail.clientWidth) + 'px';
+
+			domNextRailBlock.style.left = (sliderContainer.offsetLeft + domNextRail.offsetLeft) + 'px';
+
+			domNextRailBlock.style.width = (controlBarContainer.offsetWidth - domNextRailBlock.offsetLeft) + 'px';
+
+		
 		}
+
+
 	})
 
 	player.on('playlist', function(_playlist){
