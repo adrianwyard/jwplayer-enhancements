@@ -25,9 +25,7 @@ RSS support with start and duration times will need to be added using the [_JW P
  
 I plan to switch video hosting to jwplayer.com from _AWS_ as the conversion to `HLS` is easier.
 
-I suggest we use `testrss-jw.xml` for a test playlist as this has urls that point to HLS sources at cdn.jwplayer.com. 
-
-> [Here’s a test page that uses this playlist](https://www.counterbalance.org/test/testjw8-hosted.html)
+The repo includes a representative test rss file: testrss-dvh.xml that can be used to test the conversion.
 
 ---
 **My licensed JW Player 8 can be loaded with this url:**
