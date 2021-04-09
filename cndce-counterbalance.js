@@ -41,8 +41,8 @@
 			playerContainer.classList.remove('prev-block-hover');
 		}
 		domPreviousRailBlock.onclick = function(){
-			isSeeking = true;
-			player.playlistPrev();
+			isSeeking = false;
+			player.trigger('seek', {offset: 0})
 		}
 
 		domNextRailBlock = document.createElement('div');
@@ -56,8 +56,8 @@
 			playerContainer.classList.remove('next-block-hover');
 		}
 		domNextRailBlock.onclick = function(){
-			isSeeking = true;
-			player.playlistNext();
+			isSeeking = false;
+			player.trigger('seek', {offset: player.getDuration()});
 		}
 
 		controlBarContainer.prepend(domPreviousRailBlock);
@@ -119,8 +119,10 @@
 	player.on('time', function({position, offset}){
 
 
-		if(isSeeking)
+		if(isSeeking){
+			player.trigger('seeked');
 			return;
+		}
 
 		var currPlaylist = player.getPlaylistItem();
 		var iPlaylist = player.getPlaylistIndex();
@@ -135,13 +137,16 @@
 				player.stop();
 			}else{
 				player.next();
+				player.trigger('seeked');
 			}
 		}else if(_pos < currPlaylist.sources[0].starttime - 2){
 			
 			if(iPlaylist == 0){
 				player.seek(currPlaylist.sources[0].starttime);
+				player.trigger('seeked');
 			}else{
 				player.playlistItem(iPlaylist - 1);
+				player.trigger('seeked');
 			}
 		}
 	})
