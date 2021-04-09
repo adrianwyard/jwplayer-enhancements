@@ -4,6 +4,8 @@
 	    playlist: "./playlist-dvj.xml",
 	   	allowfullscreen: "true",
 		// repeat: "list",
+		height: 264,
+		width: 352,
 		preload: "auto",
 		modes: [{ type: 'html5' }]
 	});
