@@ -19,6 +19,8 @@
 				    playlist: "/" + ctfarr[1] + "/" + ctfarr[2] + "-dvj.xml", // The final version will prefix urls with "https://www.counterbalance.net/"
 				   	allowfullscreen: "true",
 					// repeat: "list",
+					height: 264,
+					width: 352,
 					preload: "auto",
 					modes: [{ type: 'html5' }]
 				});
