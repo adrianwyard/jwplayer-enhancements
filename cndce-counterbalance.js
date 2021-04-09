@@ -18,6 +18,7 @@
 	var domPreviousRail;
 	var domNextRail;
 
+	var isSeeking = false;
 
 	// Initialize DOM elements
 	player.on('ready', function(){
@@ -38,16 +39,18 @@
 	})
 
 	player.on('meta', function(meta){
-		var currPlaylist = player.getPlaylistItem();
 
-		
-		domPreviousRail.style.width = (currPlaylist.sources[0].starttime /  meta.seekRange.end) * 100 + '%';
+		if(meta.metadataType == 'media'){
+			var currPlaylist = player.getPlaylistItem();
 
-
-		
-		domNextRail.style.width = (1 - (currPlaylist.end / meta.seekRange.end)) * 100 + '%';
+			// Rails
+			domPreviousRail.style.width = (currPlaylist.sources[0].starttime /  meta.seekRange.end) * 100 + '%';
 
 
+			domNextRail.style.width = (1 - (currPlaylist.end / meta.seekRange.end)) * 100 + '%';
+
+
+		}
 	})
 
 	player.on('playlist', function(_playlist){
@@ -56,26 +59,36 @@
 		
 	})
 
+	player.on('seek', function({offset}){
+		player.trigger('time', {position: offset});
+		isSeeking = true;
+	})
 
 
-	player.on('time seek', function({position, offset}){
+
+
+	player.on('time', function({position, offset}){
+
+
+		if(isSeeking)
+			return;
+
 		var currPlaylist = player.getPlaylistItem();
 		var iPlaylist = player.getPlaylistIndex();
 
-		// Used when seek is triggered
-		if(offset)
-			position = offset;
+		const _pos = offset ? offset : position;
+
+		if(_pos > currPlaylist.end){
 
 
-		if(position > currPlaylist.end){
 			if(iPlaylist == playlist.length - 1){
 				player.seek(currPlaylist.sources[0].starttime);
 				player.stop();
 			}else{
 				player.next();
 			}
+		}else if(_pos < currPlaylist.sources[0].starttime - 2){
 			
-		}else if(position < currPlaylist.sources[0].starttime - 2){
 			if(iPlaylist == 0){
 				player.seek(currPlaylist.sources[0].starttime);
 			}else{
@@ -84,11 +97,20 @@
 		}
 	})
 
-	player.on('playlistItem', function({index, item}){
-		// Ensure playlist always follows starttime
-		player.seek(item.sources[0].starttime);
+	player.on('seeked', function(){
 
+
+		const currPos = player.getPosition();
+		const startTime = player.getPlaylistItem().sources[0].starttime;
+		const endTime = player.getPlaylistItem().end;
+
+		if(currPos < startTime - 1 || currPos > endTime + 1){
+			player.seek(player.getPlaylistItem().sources[0].starttime);
+		}else{
+			isSeeking = false;
+		}
 	})
+
 
 })();
 
