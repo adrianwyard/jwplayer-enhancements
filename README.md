@@ -23,7 +23,7 @@ The current JW Player version 8 supports HLS but no longer reads the numerous st
 ## Implementation
 RSS support with start and duration times will need to be added using the [_JW Player 8 API_](https://developer.jwplayer.com/jwplayer/docs/jw8-javascript-api-reference).
  
-I plan to switch video hosting to jwplayer.com from _AWS_ as the conversion to `HLS` is easier.
+I plan to switch (most of the) video hosting to jwplayer.com from _AWS_ as the conversion to `HLS` is easier.
 
 The repo includes a representative test rss file: testrss-dvh.xml that can be used to test the conversion.
 
@@ -52,10 +52,10 @@ Once we have a player working we should confirm it works using the `mediaWindowH
 > I’ve already created a simple version of the new mediaWindowHtml function that is loaded from [https://counterbalance.net/scripts/cbfscripts2.js](https://counterbalance.net/scripts/cbfscripts2.js), and a test page that uses it: [https://www.counterbalance.org/test/playertest1.html](https://www.counterbalance.org/test/playertest1.html)._
 
 ---
-HLS Streaming from counterbalance.org (updated 6Apr21)
+HLS Streaming from counterbalance.org (updated 9Apr21)
 https://docs.google.com/document/d/1YO6puHSoAF2n6FtaE-Ag4ZSsveWnDMWE8YDE7dgYlmE/edit?usp=sharing
 Test version: https://counterbalance.org/hlspoc/index.html
 
-Synchronize Media Playback for Multiple Viewers (updated 6Apr21)
+Synchronize Media Playback for Multiple Viewers (updated 9Apr21)
 https://docs.google.com/document/d/1Ben-TDqjZigTlpjIygDd0neTZeFB6g36SCovqR9dTnI/edit?usp=sharing
 
