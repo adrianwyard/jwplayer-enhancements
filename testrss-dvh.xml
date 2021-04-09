@@ -11,6 +11,14 @@ xmlns:media="http://search.yahoo.com/mrss/">
     </item>
     <item>
       <title>Video</title>
+      <media:content url="https://s3.amazonaws.com/counterbalance-video/polk.m4v" start="" duration="" />
+    </item>
+    <item>
+      <title>Video</title>
+      <media:content url="https://s3.amazonaws.com/counterbalance-video/stemc2.m4v" start="20:54" />
+    </item>
+    <item>
+      <title>Video</title>
       <media:content url="https://s3.amazonaws.com/counterbalance-video/cq1.m4v" start="22:28" duration="23:46" />
     </item>
     <item>
