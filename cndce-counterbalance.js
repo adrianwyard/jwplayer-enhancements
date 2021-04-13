@@ -1,3 +1,5 @@
+var CNDCE_TEST_MODE = true;
+
 (() => {
 
 	var player = jwplayer("myElement").setup({
@@ -131,6 +133,8 @@
 
 		if(_pos > currPlaylist.end){
 
+			if(CNDCE_TEST_MODE)
+				console.log('time next', _pos, currPlaylist);
 
 			if(iPlaylist == playlist.length - 1){
 				player.seek(currPlaylist.sources[0].starttime);
@@ -140,6 +144,9 @@
 				player.trigger('seeked');
 			}
 		}else if(_pos < currPlaylist.sources[0].starttime - 2){
+			if(CNDCE_TEST_MODE)
+				console.log('time prev', _pos, currPlaylist);
+
 			
 			if(iPlaylist == 0){
 				player.seek(currPlaylist.sources[0].starttime);
@@ -148,6 +155,9 @@
 				player.playlistItem(iPlaylist - 1);
 				player.trigger('seeked');
 			}
+		}else{
+			if(CNDCE_TEST_MODE)
+				console.log('time', _pos, currPlaylist);
 		}
 	})
 
@@ -157,6 +167,8 @@
 		const currPos = player.getPosition();
 		const startTime = player.getPlaylistItem().sources[0].starttime;
 		const endTime = player.getPlaylistItem().end;
+		if(CNDCE_TEST_MODE)
+			console.log('seeked', currPos, startTime, endTime);
 
 		if(currPos < startTime - 1 || currPos > endTime + 1){
 			player.seek(player.getPlaylistItem().sources[0].starttime);
