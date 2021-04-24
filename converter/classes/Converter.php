@@ -30,6 +30,10 @@ class Converter{
         }        
     }
 
+    private static function aws_to_jw_filename(string $xmlFilename){
+        return preg_replace('/(.*)\.xml$/', '$1.json', $xmlFilename);
+    }
+
     
 
     public static function aws_to_jw_url(string $awsUrl){
@@ -83,6 +87,48 @@ class Converter{
 
         return $playlist;
     }
+
+    public static function aws_to_jw_playlist(string $awsUrl){
+
+        /**
+         * Get playlist filename
+         */
+        [,$playlistFilenameXML] = explode(PLAYLIST_BASE_URL, $awsUrl);
+
+
+
+        $playlistFilenameJson = self::aws_to_jw_filename($playlistFilenameXML);
+
+
+
+        $jsonUrl = PLAYLIST_BASE_URL. $playlistFilenameJson;
+
+
+        
+        /**
+         * Look for existing JSON file.
+         * If none exists, create one
+         */
+         if(!array_search($playlistFilenameJson, scandir(PLAYLIST_BASE_URL))){
+            file_put_contents(
+                $jsonUrl,
+                json_encode(self::aws_to_jw_data($awsUrl))
+            );
+         }
+
+
+         /**
+         * Respond with json file
+         */
+        include $jsonUrl; 
+
+
+
+    }
+
+    
+
+    
 }
 
 
