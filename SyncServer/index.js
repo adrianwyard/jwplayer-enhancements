@@ -1,3 +1,6 @@
+
+
+// Create a html server on port 5000.
 var http = require('http');
 var fs = require('fs');
 var index = fs.readFileSync('index.html');
@@ -5,22 +8,23 @@ var index = fs.readFileSync('index.html');
 http.createServer(function (req, res) {
   res.writeHead(200, {'Content-Type': 'text/html'});
   res.end(index);
-}).listen(5000);
+}).listen(5000);   
 
 
+// Create websocket server on Port 8082 
+// Based off sample at https://github.com/websockets/ws 
+// TODO: Wrap create process in Try/catch.
 
 const WebSocket = require("ws");
-const wss = new WebSocket.Server({port:8082});
+const wss = new WebSocket.Server({port:'8082'});
+console.log("Socket Server Started");       
 
-let connCounter = 0;
+let connCounter = 0;   // Track current number of browser sessions.
+console.log("Number of Connections", connCounter);
 
-// Here I've modified WS sample from functions to using arrow functions.
-// https://github.com/websockets/ws
-
-// Connection handler block
 wss.on('connection', (ws, req)=> {
     
-    console.log("New client connected! Total connections=", ++connCounter);   
+    console.log("New client connected. Total connections=", ++connCounter);   
 
     ws.on('message', data=> {
       wss.clients.forEach(client=> {
@@ -35,8 +39,6 @@ wss.on('connection', (ws, req)=> {
     });
 
 });
-
-console.log("Number Connections", connCounter);
 
     // const ip = req.headers.pragma;
     // const ip = req.headers['x-forwarded-for'].split(/\s*,\s*/)[0];
