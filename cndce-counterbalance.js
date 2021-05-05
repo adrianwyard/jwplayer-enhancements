@@ -1,182 +1,253 @@
-var CNDCE_TEST_MODE = true;
+class CBPlayer{
+	player;
+	playlist;
 
-(() => {
+	domPlayer;
+	domControlBar;
+	domSliderContainer;
 
-	var player = jwplayer("myElement").setup({
-	    playlist: "./playlists/testrss-dvh.xml",
-	   	allowfullscreen: "true",
-		// repeat: "list",
-		height: 264,
-		width: 352,
-		preload: "auto",
-		modes: [{ type: 'html5' }]
-	});
+	domPreviousRailBlock;
+	domPreviousRail;
+	domNextRailBlock;
+	domNextRail;
 
-	var playlist;
+	isSeeking = false;
+	testMode;
 
-	var playerContainer;
-	var controlBarContainer;
-	var sliderContainer;
+	
+	constructor({
+		ctf,
+		el,
+		testMode = false
+	}){
+		this.testMode = testMode;
 
-	var domPreviousRailBlock;
-	var domPreviousRail;
-	var domNextRailBlock;
-	var domNextRail;
+		this.__initDOMPlayer(el);
+		this.__initPlayer(ctf);
+	}
 
-	var isSeeking = false;
+	__initDOMPlayer(el){
+		if(el){
+			this.domPlayer = el;
 
-	// Initialize DOM elements
-	player.on('ready', function(){
-		playerContainer = document.getElementById('myElement');
-		controlBarContainer = playerContainer.querySelector('.jw-controlbar');
-		sliderContainer = controlBarContainer.querySelector('.jw-slider-container');
+		}else{
+			this.domPlayer = document.createElement('div');
+			this.domPlayer.id = "cb-player";
+
+			document.body.append(this.domPlayer);
+		}
+	}
+
+	__initPlayer(ctf){
+		this.player = jwplayer(this.domPlayer).setup({
+			playlist: ctf,
+			   allowfullscreen: "true",
+			// repeat: "list",
+			height: 264,
+			width: 352,
+			preload: "auto",
+			modes: [{ type: 'html5' }]
+		});
+
+		// Player events
+		this.player.on('ready', this.__onPlayerReady.bind(this));
+		this.player.on('meta', this.__onPlayerMeta.bind(this))
+		this.player.on('playlist', this.__onPlayerPlaylist.bind
+		(this));
+		this.player.on('seek', this.__onPlayerSeek.bind(this));
+		this.player.on('time', this.__onPlayerTime.bind(this));
+		this.player.on('seeked', this.__onPlayerSeeked.bind(this));
+	}
+
+	/**
+	 * Adds an invisible DOM to block mouse/tap events on 
+	 * positions outside the current playlist item `starttime` 
+	 * and `end`
+	 */
+	__initSliderBlocks(){
+		this.domPreviousRailBlock = document.createElement('div');
+		this.domPreviousRailBlock.classList.add('cndce-rail-block');
+		this.domPreviousRailBlock.classList.add('cndce-rail-block-prev');
+
+		this.domPreviousRailBlock.onmouseenter = ()=>{
+			this.domPlayer.classList.add('prev-block-hover');
+		}
+		this.domPreviousRailBlock.onmouseleave = ()=>{
+			this.domPlayer.classList.remove('prev-block-hover');
+		}
+		this.domPreviousRailBlock.onclick = ()=>{
+			this.isSeeking = false;
+			this.player.trigger('seek', {offset: 0})
+		}
+
+		this.domNextRailBlock = document.createElement('div');
+		this.domNextRailBlock.classList.add('cndce-rail-block');
+		this.domNextRailBlock.classList.add('cndce-rail-block-next');
+
+		this.domNextRailBlock.onmouseenter = ()=>{
+			this.domPlayer.classList.add('next-block-hover');
+		}
+		this.domNextRailBlock.onmouseleave = ()=>{
+			this.domPlayer.classList.remove('next-block-hover');
+		}
+		this.domNextRailBlock.onclick = ()=>{
+			this.isSeeking = false;
+			this.player.trigger('seek', {offset: this.player.getDuration()});
+		}
+
+		this.domControlBar.prepend(this.domPreviousRailBlock);
+		this.domControlBar.prepend(this.domNextRailBlock);
+	}
+
+	/**
+	 * Adds additional black rails to the slider for positions
+	 * outside the current playlist item `starttime` and `end`
+	 */
+	__initAddtlRails(){
+		this.domPreviousRail = document.createElement('div');
+		this.domPreviousRail.classList.add('cndce-prev-rail');
+		this.domPreviousRail.classList.add('cndce-rail');
+
+		this.domNextRail = document.createElement('div');
+		this.domNextRail.classList.add('cndce-next-rail');
+		this.domNextRail.classList.add('cndce-rail');
+
+		this.domSliderContainer.prepend(this.domNextRail);
+		this.domSliderContainer.prepend(this.domPreviousRail)
+	}
+
+	/**
+	 * Initialize custom DOM elements
+	 */
+	__onPlayerReady(){
+		// Reset reference to `this.domPlayer`
+		this.domPlayer = document.getElementById(this.domPlayer.id);
+
+		this.domControlBar = this.domPlayer.querySelector('.jw-controlbar');
+		this.domSliderContainer = this.domControlBar.querySelector('.jw-slider-container');
 
 		// Add slider block
-		domPreviousRailBlock = document.createElement('div');
-		domPreviousRailBlock.classList.add('cndce-rail-block');
-		domPreviousRailBlock.classList.add('cndce-rail-block-prev');
-
-		domPreviousRailBlock.onmouseenter = function (){
-			playerContainer.classList.add('prev-block-hover');
-		}
-		domPreviousRailBlock.onmouseleave = function(){
-			playerContainer.classList.remove('prev-block-hover');
-		}
-		domPreviousRailBlock.onclick = function(){
-			isSeeking = false;
-			player.trigger('seek', {offset: 0})
-		}
-
-		domNextRailBlock = document.createElement('div');
-		domNextRailBlock.classList.add('cndce-rail-block');
-		domNextRailBlock.classList.add('cndce-rail-block-next');
-
-		domNextRailBlock.onmouseenter = function (){
-			playerContainer.classList.add('next-block-hover');
-		}
-		domNextRailBlock.onmouseleave = function(){
-			playerContainer.classList.remove('next-block-hover');
-		}
-		domNextRailBlock.onclick = function(){
-			isSeeking = false;
-			player.trigger('seek', {offset: player.getDuration()});
-		}
-
-		controlBarContainer.prepend(domPreviousRailBlock);
-		controlBarContainer.prepend(domNextRailBlock);
+		this.__initSliderBlocks();
+		
 
 		// Add additional rail elements
-		domPreviousRail = document.createElement('div');
-		domPreviousRail.classList.add('cndce-prev-rail');
-		domPreviousRail.classList.add('cndce-rail');
+		this.__initAddtlRails();
 
-		domNextRail = document.createElement('div');
-		domNextRail.classList.add('cndce-next-rail');
-		domNextRail.classList.add('cndce-rail');
+	}
 
-		sliderContainer.prepend(domNextRail);
-		sliderContainer.prepend(domPreviousRail)
-
-	})
-
-	player.on('meta', function(meta){
+	/**
+	 * Called when new metadata is loaded in player (ie. on
+	 * playlist item update)
+	 * 
+	 * Updates slider custom elements' positions
+	 * 
+	 * @param meta 
+	 */
+	__onPlayerMeta(meta){
 
 		if(meta.metadataType == 'media'){
-			var currPlaylist = player.getPlaylistItem();
+			var currPlaylist = this.player.getPlaylistItem();
 
 			// Rails
-			domPreviousRail.style.width = (currPlaylist.sources[0].starttime /  meta.seekRange.end) * 100 + '%';
+			this.domPreviousRail.style.width = (currPlaylist.sources[0].starttime /  meta.seekRange.end) * 100 + '%';
 
 
-			domNextRail.style.width = (1 - (currPlaylist.end / meta.seekRange.end)) * 100 + '%';
+			this.domNextRail.style.width = (1 - (currPlaylist.end / meta.seekRange.end)) * 100 + '%';
 
 
 			// Blocks
-			domPreviousRailBlock.style.width = (sliderContainer.offsetLeft + domPreviousRail.clientWidth) + 'px';
+			this.domPreviousRailBlock.style.width = (this.domSliderContainer.offsetLeft + this.domPreviousRail.clientWidth) + 'px';
 
-			domNextRailBlock.style.left = (sliderContainer.offsetLeft + domNextRail.offsetLeft) + 'px';
+			this.domNextRailBlock.style.left = (this.domSliderContainer.offsetLeft + this.domNextRail.offsetLeft) + 'px';
 
-			domNextRailBlock.style.width = (controlBarContainer.offsetWidth - domNextRailBlock.offsetLeft) + 'px';
+			this.domNextRailBlock.style.width = (this.domControlBar.offsetWidth - this.domNextRailBlock.offsetLeft) + 'px';
 
 		
 		}
+	}
+
+	/**
+	 * Called everytime a new playlist is loaded in the player
+	 * 
+	 * Updates class playlist reference
+	 * 
+	 * @param playlist The new playlist to be loaded
+	 */
+	__onPlayerPlaylist(playlist){
+		this.playlist = playlist;
+	}
+
+	__onPlayerSeek({offset}){
+		this.player.trigger('time', {position: offset});
+		this.isSeeking = true;
+	}
 
 
-	})
+	/**
+	 * Called when player is playing and playback position gets 
+	 * updated. May occur as frequently as 10 times per second.
+	 * 
+	 * Contains the main logic for detecting when current time
+	 * goes outside current playlist `starttime` and `end`
+	 * 
+	 * @param {Object} param
+	 * @param param.position
+	 * @param param.offset
+	 */
+	__onPlayerTime({position, offset}){
 
-	player.on('playlist', function(_playlist){
-		// Update global playlist reference when playlist changes
-		playlist = _playlist.playlist;
-		
-	})
-
-	player.on('seek', function({offset}){
-		player.trigger('time', {position: offset});
-		isSeeking = true;
-	})
-
-
-
-
-	player.on('time', function({position, offset}){
-
-
-		if(isSeeking){
-			player.trigger('seeked');
+		if(this.isSeeking){
+			this.player.trigger('seeked');
 			return;
 		}
 
-		var currPlaylist = player.getPlaylistItem();
-		var iPlaylist = player.getPlaylistIndex();
+		var currPlaylist = this.player.getPlaylistItem();
+		var iPlaylist = this.player.getPlaylistIndex();
 
 		const _pos = offset ? offset : position;
 
 		if(_pos > currPlaylist.end){
 
-			if(CNDCE_TEST_MODE)
+			if(this.testMode)
 				console.log('time next', _pos, currPlaylist);
 
-			if(iPlaylist == playlist.length - 1){
-				player.seek(currPlaylist.sources[0].starttime);
-				player.stop();
+			if(iPlaylist == this.playlist.length - 1){
+				this.player.seek(currPlaylist.sources[0].starttime);
+				this.player.stop();
 			}else{
-				player.next();
-				player.trigger('seeked');
+				this.player.next();
+				this.player.trigger('seeked');
 			}
 		}else if(_pos < currPlaylist.sources[0].starttime - 2){
-			if(CNDCE_TEST_MODE)
+			if(this.testMode)
 				console.log('time prev', _pos, currPlaylist);
 
 			
 			if(iPlaylist == 0){
-				player.seek(currPlaylist.sources[0].starttime);
-				player.trigger('seeked');
+				this.player.seek(currPlaylist.sources[0].starttime);
+				this.player.trigger('seeked');
 			}else{
-				player.playlistItem(iPlaylist - 1);
-				player.trigger('seeked');
+				this.player.playlistItem(iPlaylist - 1);
+				this.player.trigger('seeked');
 			}
 		}else{
-			if(CNDCE_TEST_MODE)
+			if(this.testMode)
 				console.log('time', _pos, currPlaylist);
 		}
-	})
+	}
 
-	player.on('seeked', function(){
+	__onPlayerSeeked(){
+		const currPos = this.player.getPosition();
+		const startTime = this.player.getPlaylistItem().sources[0].starttime;
+		const endTime = this.player.getPlaylistItem().end;
 
-
-		const currPos = player.getPosition();
-		const startTime = player.getPlaylistItem().sources[0].starttime;
-		const endTime = player.getPlaylistItem().end;
-		if(CNDCE_TEST_MODE)
+		if(this.testMode)
 			console.log('seeked', currPos, startTime, endTime);
 
 		if(currPos < startTime - 1 || currPos > endTime + 1){
-			player.seek(player.getPlaylistItem().sources[0].starttime);
+			this.player.seek(this.player.getPlaylistItem().sources[0].starttime);
 		}else{
-			isSeeking = false;
+			this.isSeeking = false;
 		}
-	})
-
-
-})();
-
+	}
+}
