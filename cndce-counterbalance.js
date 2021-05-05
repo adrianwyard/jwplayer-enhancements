@@ -1,4 +1,7 @@
 class CBPlayer{
+	static PLAYLIST_BASE_URL = '../';
+	static PLAYLIST_RSS_EXTENSION = '-dvh.xml';
+
 	player;
 	playlist;
 
@@ -18,12 +21,13 @@ class CBPlayer{
 	constructor({
 		ctf,
 		el,
-		testMode = false
+		testMode = false,
+		...jwParams
 	}){
 		this.testMode = testMode;
 
 		this.__initDOMPlayer(el);
-		this.__initPlayer(ctf);
+		this.__initPlayer(ctf, jwParams);
 	}
 
 	__initDOMPlayer(el){
@@ -39,15 +43,10 @@ class CBPlayer{
 		}
 	}
 
-	__initPlayer(ctf){
+	__initPlayer(ctf, params = {}){
 		this.player = jwplayer(this.domPlayer).setup({
 			playlist: ctf,
-			   allowfullscreen: "true",
-			// repeat: "list",
-			height: 264,
-			width: 352,
-			preload: "auto",
-			modes: [{ type: 'html5' }]
+			...params
 		});
 
 		// Player events
