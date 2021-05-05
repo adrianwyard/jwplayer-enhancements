@@ -27,8 +27,9 @@ class CBPlayer{
 	}
 
 	__initDOMPlayer(el){
+		
 		if(el){
-			this.domPlayer = el;
+			this.domPlayer = typeof el == "string" ? document.getElementById(el) : el;
 
 		}else{
 			this.domPlayer = document.createElement('div');
