@@ -3,7 +3,7 @@ var CNDCE_TEST_MODE = true;
 (() => {
 
 	var player = jwplayer("myElement").setup({
-	    playlist: "./playlists/playlist-dvj.xml",
+	    playlist: "./playlists/testrss-dvh.xml",
 	   	allowfullscreen: "true",
 		// repeat: "list",
 		height: 264,
