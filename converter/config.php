@@ -9,7 +9,7 @@
 
     define('VIDEO_MAP_URL', '../playlists/video-map.tsv');
 
-    define('PLAYLIST_BASE_URL', '../playlists/');
+    define('PLAYLIST_BASE_URL', '../');
 
     ini_set('allow_url_fopen', 1);
 

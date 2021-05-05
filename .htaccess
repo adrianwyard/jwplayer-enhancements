@@ -1,4 +1,4 @@
 Options +FollowSymLinks -MultiViews
 RewriteEngine On
 
-RewriteRule playlists/(.*).xml$ converter?playlist=$1.xml [L]
+RewriteRule (.*).xml$ converter?playlist=$1.xml [L]
