@@ -94,7 +94,7 @@ console.log("New client connected. Total connections=", ++connCounter);
       ClientData = JSON.parse(data);                console.log("EventCode" , ClientData.eventCode);
 
       if (ClientData.eventCode=="NEW" ){             console.log("New Client");
-        serverData.echoText = "Hello New Client";
+        serverData.echoText = ClientData.sendText;
         serverData.eventCode = "NEW";
         serverData.serverTimeCode = sw.getRunTime();    
         let payload = JSON.stringify(serverData);
