@@ -1,10 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+<!-- 
+  QUICK REF LINK  
+  https://developer.jwplayer.com/jwplayer/docs/jw8-javascript-api-reference
+-->
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/assets/style.css" />
+    <script type="text/javascript" src="https://cdn.jwplayer.com/libraries/NMuIi6sP.js"></script>
+
+   <!-- <link rel="stylesheet" href="assets/style.css" />  -->
     <title>WebSockets</title>
 </head>
 
@@ -12,20 +18,25 @@
 
 <table>
 <tr>
-<td><h1>Payload Tests 1.1 </h1></td>
+<td><h1>Payload Tests 1.6 </h1></td>
 </tr>
   <tr>
     <td><input type="text" id="myText" name="myText"> </td>
-    <td><input type="text" id="echoText" name="echoText"> </td>
+    <td><input type="text" size="50" id="echoText" name="echoText" value="NoSocket"></td>
+    <td><input type="text" size="20" id="timeBox"></td>
   </tr>
   <tr>
     <td><button type="button" onclick="sendMyText()">Send My Text</button></td>
     <td><button type="button" onclick="sendEchoText()">Send Group Text</button></td>
   </tr>
-  <tr>    <td></td>   <td></td>  </tr>
+  <tr> <td>\n</td>   <td></td>  </tr>
   <tr>
     <td><button type="button" onclick="videoPlay()">Play</button>
-      <button type="button" onclick="videoPause()">Pause</button></td>
+      <button type="button" onclick="videoPause()">Pause</button>
+      <button type="button" onclick="videoSync()">Sync All</button>
+      <button type="button" onclick="joinRoom()">Join Room</button>
+      </td>
+
     <td><input type="text" id="playState" name="playState"> </td>
   </tr>
 </table>
@@ -34,89 +45,153 @@
 <tr>
 <td>
    <div class="video-player">
-      <video
-        src="assets/linkRail.mov" 
-       poster="assets/Splash.png"
-        class="video"
-      >
-      </video>
 
-      <div class="player-controls">
-        <div class="video-progress">
-          <div class="video-progress-filled"></div>
-        </div>
-
-        <button class="play-button" title="Play">►</button>
-
-        <input
-          type="range"
-          class="volume"
-          min="0"
-          max="1"
-          step="0.01"
-          value="1"
-        />
-
-        <div class="time">
-          <span class="current">0:00</span> / <span class="duration">0:00</span>
-        </div>
-      </div>
-    </div>
-
+<div id="myElement">Player loading...</div>
+ </div>
+<a href="javascript:jwplayer('myElement').play();">Toggle playback</a>
+<a href="javascript:alert('The volume of the player is: ' + jwplayer('myElement').getVolume());">Report volume</a>
+   
 </td>
 </tr>
-</table
- 
-<!-- WS Script Core Socket Stuff-->
-  <script >
-    const ws = new WebSocket("ws://107.21.179.138:8082");
-  
-  //  const ws = new WebSocket("ws://ec2-18-237-232-102.us-west-2.compute.amazonaws.com:8082");
-    ws.addEventListener("open", ()=>{
-      console.log("addEventListener ->connected");
-      ws.send("Hey hows it going");
+</table>
+
+<!-- JW Player Code-->
+<script type="text/JavaScript">
+    jwplayer("myElement").setup({
+	    "playlist": [{
+      "file": "https://s3.amazonaws.com/counterbalance-video/stemc1.m4v"
+      }],
+//responsive: true,
+//width: "50%",
+//aspectratio: "16:9",
+ //     width: 480,
+   //  height: 270,
+    autostart: true,
+  //  mute: false,
+  //  volume: 80,
       });
 
-    ws.addEventListener("message",({data}) =>{      
-          console.log(data);
+//jwplayer("myElement").on('ready');
 
-    switch (data) {
-      case 'PLAY':
-          video.play()
-        document.getElementById("playState").value = data;
-      break;
-      case 'PAUSE':
-          video.pause()
-        document.getElementById("playState").value = data;
-      break;
-      
-      default:
-                document.getElementById("echoText").value = data;
+   // jwplayer("myElement").resize(480, 470);
+  // jwplayer("myElement").play(false);
+
+    // Related to sticky play issue.
+    // jwplayer("myElement").seek(1);
+    //jwplayer("myElement").play();
+</script>
+
+ 
+<!-- WS Script Core Socket Code -->
+ <script type="text/JavaScript">
+    let startTime = Date.now();
+
+    let ClientData = {
+      "eventCode":"NEW",
+      "clientTimeCode":0,
+      "clientTimeStamp":0,
+      "clientDate":startTime,
+      "sendText":"na",
       }
-    });
-      
+
+    let ServerData = {
+      "eventCode":"",
+      "serverTimeCode":0,
+      "serverTimeStamp":0,
+      "echoText":"na",
+      }
+
+  //  const ws = new WebSocket("ws://ec2-18-237-232-102.us-west-2.compute.amazonaws.com:8082");
+    const ws = new WebSocket("ws://localhost:8082");
+    ws.addEventListener("open", ()=>{
+      ClientData.eventCode="NEW";
+      ClientData.sendText="Hello World: "+ClientData.clientDate;
+      //ClientData.sendText=Date.now().toTimeString();
+      let payload = JSON.stringify(ClientData); 
+      ws.send(payload);
+
+      //  ws.send("Hey hows it going");
+      });
+
+
+    ws.addEventListener("message",({data}) =>{      
+      ServerData = JSON.parse(data);
+      data = ServerData.eventCode;
+
+      switch (ServerData.eventCode) {
+        case 'PLAY':
+          jwplayer("myElement").play();
+          document.getElementById("playState").value = ServerData.eventCode;
+          break; 
+        case 'NEW':
+          jwplayer("myElement").seek(ServerData.serverTimeCode);
+       //   jwplayer("myElement").pause();
+          jwplayer("myElement").play();
+          document.getElementById("playState").value = ServerData.eventCode;
+          document.getElementById("echoText").value = ServerData.echoText;
+          break; 
+        case 'PAUSE':
+          jwplayer("myElement").pause();
+          document.getElementById("playState").value = ServerData.eventCode;
+          break;
+        case 'SYNCALL':
+          jwplayer("myElement").seek(ServerData.serverTimeCode);
+          document.getElementById("timeBox").value = ServerData.serverTimeCode;
+          jwplayer("myElement").pause();
+          jwplayer("myElement").play();
+          break;
+
+        default:
+          document.getElementById("echoText").value = ServerData.echoText;
+        }
+      });
+ 
     function sendMyText() {
-      let payload = document.getElementById("myText").value;
+      let currentTime = Date.now();
+      ClientData.clientTimeStamp = currentTime - startTime;
+      ClientData.clientDate;
+      ClientData.sendText = document.getElementById("myText").value;
+      let payload = JSON.stringify(ClientData);
+      // let payload = document.getElementById("myText").value;
       ws.send(payload);
     }
 
-   function sendEchoText() {
-      let payload = document.getElementById("echoText").value;
+    function sendEchoText() {
+      ClientData.sendText = document.getElementById("echoText").value;
+    
+      let payload = JSON.stringify(ClientData);
+    // let payload = document.getElementById("echoText").value;
       ws.send(payload);
     }
 
    function videoPlay() {
-      let payload = "PLAY";
+      ClientData.eventCode = "PLAY";
+      let payload = JSON.stringify(ClientData);
       ws.send(payload);
     }
 
    function videoPause() {
-      let payload = "PAUSE";
+      ClientData.eventCode = "PAUSE";
+      let payload = JSON.stringify(ClientData);
       ws.send(payload);
     }
+
+    function videoSync() {
+      ClientData.eventCode = "SYNCALL";
+      ClientData.clientTimeCode= jwplayer("myElement").getPosition();
+      let payload = JSON.stringify(ClientData);
+      ws.send(payload);
+    }
+  function joinRoom() {
+      ClientData.eventCode = "NEW";
+      let payload = JSON.stringify(ClientData);
+      ws.send(payload);
+    }
+
+
   </script>
 
- 
+ <!--
 <script>
 // Source for video Player
 const videoPlayer = document.querySelector('.video-player')
@@ -173,7 +248,7 @@ progress.addEventListener('click', (e) =>{
 </script>
 </body>
 </html>
-
+-->
  <!--
 <button type="button" onclick="document.write(5 + 6)">Try it</button>
   <div onclick="console.log('first div')">
@@ -203,6 +278,49 @@ progress.addEventListener('click', (e) =>{
     }
 
 
+      <div class="player-controls">
+        <div class="video-progress">
+          <div class="video-progress-filled"></div>
+        </div>
+
+        <button class="play-button" title="Play">►</button>
+
+        <input
+          type="range"
+          class="volume"
+          min="0"
+          max="1"
+          step="0.01"
+          value="1"
+        />
+
+        <div class="time">
+          <span class="current">0:00</span> / <span class="duration">0:00</span>
+        </div>
 
 
--->
+
+      </div>
+    
+   sharing: {
+    sites: ["facebook","twitter","email","linkedin","pinterest"]
+  },
+  intl: {
+    en: {
+      sharing: {
+        heading: "Share this awesome video"
+      }
+    }
+  }
+
+
+
+const faces = ["😁", "🥳", "😎"];
+
+const flags = ["🏴‍☠️", "🏁", "🏳️‍🌈"];
+
+const fruits = ["🍊", "🍌", "🍎"];
+
+const mergedArrays = [...faces, ...flags, ...fruits];
+
+console.log(mergedArrays);-->
