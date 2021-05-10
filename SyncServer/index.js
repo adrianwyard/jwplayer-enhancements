@@ -22,10 +22,10 @@ class StopWatch {
 
   constructor () {
     this.startTime = 0;
-    this.accumulatedRunTime = 0;
-    this.normalizedRunTime=0;
+    this.accumulatedRunTime = 0;    //   this.normalizedRunTime=0;
     this.isRunning = false;
   }
+
   start () {this.run();}
 
   run () {
@@ -37,23 +37,26 @@ class StopWatch {
   stop () {                
     if (this.isRunning) {   // Ignore stop event if not running.
       this.accumulatedRunTime += Date.now()- this.startTime;
-      this.normalizedRunTime = parseInt(this.accumulatedRunTime/1000);
       this.isRunning = false;
     }};
 
-  reset (timeCode) {
-    this.accumulatedRunTime = timeCode; // TODO: Add bounds check on timecode (0<=TC<=video length)
+  reset (timeVal) {
+    this.accumulatedRunTime = timeVal; // TODO: Add bounds check on timecode (0<=TC<=video length)
     this.isRunning = false;  
   };
 
+  getTimeCode() {
+    this.getRunTime;
+  }
+
   getRunTime () {
     if (!this.isRunning){
-      return this.normalizedRunTime;     // Server's presumed actual position in video.
+      return this.accumulatedRunTime/1000;     // Server's presumed actual position in video.
     }
-      return parseInt((this.accumulatedRunTime+(Date.now() - this.startTime))/1000);
+      return (this.accumulatedRunTime+(Date.now() - this.startTime))/1000;
     }
 
-  getRunTimeSubsecond () {
+  XXgetRunTimeSubsecond () {
     if (!this.isRunning){
       return this.accumulatedRunTime/1000;     // Server's presumed actual position in video.
     }
@@ -68,13 +71,13 @@ let ClientData = {
   "eventCode":"",
   "clientTimeCode":0,
   "clientTimeStamp":0,
-  "clientDate":Date(),
+ // "clientDate":Date(),
   "sendText":"na",
 }
 let serverData = {
   "eventCode":"na",
   "serverTimeCode":0,
-  "serverTimeStamp":0,
+ // "serverTimeStamp":0,
   "echoText":"na",
 }
 
@@ -96,40 +99,41 @@ console.log("New client connected. Total connections=", ++connCounter);
       if (ClientData.eventCode=="NEW" ){             console.log("New Client");
         serverData.echoText = ClientData.sendText;
         serverData.eventCode = "NEW";
-        serverData.serverTimeCode = sw.getRunTime();    
-        let payload = JSON.stringify(serverData);
-        ws.send(payload); 
+
         if (!sw.isRunning) {   // First time start of video, then start sw.
-          sw.run();
+            sw.run();
         }
+        serverData.serverTimeCode = sw.getTimeCode();    
+
+        ws.send(JSON.stringify(serverData)); 
         
       }
       else {
         switch (ClientData.eventCode) {
           case "PLAY":
-              sw.run();                           console.log("Play Pressed"); 
+            sw.run();   // console.log("Play Pressed"); 
             break;
           case "PAUSE":
-              sw.stop();                          console.log("Pause :", sw.getRunTime());
+            sw.stop();   // console.log("Pause :", sw.getRunTime());
             break;
           case "SYNCALL":
             serverData.serverTimeCode=ClientData.clientTimeCode;
+            sw.reset(ClientData.clientTimeCode)
             break;
         }
 
         serverData.echoText = ClientData.sendText.toUpperCase();
         serverData.eventCode = ClientData.eventCode;
-        let payload= JSON.stringify(serverData);
+        serverData.serverTimeStamp=sw.getTimeCode();
 
         wss.clients.forEach(client=> {
           if (client.readyState === WebSocket.OPEN) {
-            client.send(payload);
+            client.send(JSON.stringify(serverData));
           }
         });
       }
-console.log("JSON", ClientData.eventCode, ClientData.clientTimeStamp, ClientData.clientDate);
 
-
+console.log("JSON", ClientData.eventCode, ClientData.clientTimeStamp);
     });
 
     ws.on("close",()=>{
@@ -139,27 +143,4 @@ console.log("JSON", ClientData.eventCode, ClientData.clientTimeStamp, ClientData
 });
 
 console.log("Number of Connections", connCounter);
-
-
-
-
-
-// const ip = req.headers.pragma;
-    // const ip = req.headers['x-forwarded-for'].split(/\s*,\s*/)[0];
-    // console.log("New client connected!  ", ip  );  
-
-/* // Most Basic type of connection with no broadcast capability client to other clients.
-wss.on("connection", ws=>{
-    console.log("New client connected!");
-    
-    ws.on("message", data=>{
-        console.log("Client has sent us: %s",data);
-         ws.send(data.toUpperCase().concat(": Server","Mojo", counter++));
-    });
-
-    ws.on("close",()=>{
-        console.log("Client has disconnected!");
-    });
-});
-*/
 
