@@ -1,4 +1,0 @@
-Options +FollowSymLinks -MultiViews
-RewriteEngine On
-
-RewriteRule (.*).xml$ converter?playlist=$1.xml [L]

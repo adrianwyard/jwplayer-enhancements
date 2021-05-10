@@ -5,7 +5,7 @@ function mediaWindowHtml(ctf) {
 	var ctfarr = ctf.split("/");
 
 	new CBPlayer({
-		ctf: 'https://counterbalance.net/converter/index.php?playlist=' + ctfarr[1] + "/" + ctfarr[2] + CBPlayer.PLAYLIST_RSS_EXTENSION,
+		ctf: CBPlayer.PLAYLIST_BASE_URL + ctfarr[1] + "/" + ctfarr[2] + CBPlayer.PLAYLIST_RSS_EXTENSION,
 		el: 'myElement',
 		autostart: 'false',
 		repeat: false,
@@ -22,7 +22,7 @@ function mediaWindowHtml2(ctf) {
 	var ctfarr = ctf.split("/");
 
 	new CBPlayer({
-		ctf: 'https://counterbalance.net/converter/index.php?playlist=' + ctfarr[1] + "/" + ctfarr[2] + CBPlayer.PLAYLIST_RSS_EXTENSION,
+		ctf: CBPlayer.PLAYLIST_BASE_URL + ctfarr[1] + "/" + ctfarr[2] + CBPlayer.PLAYLIST_RSS_EXTENSION,
 		el: 'myElement2',
 		autostart: 'false',
 		repeat: false,
@@ -39,7 +39,7 @@ function mediaWindowHtml3(ctf) {
 	var ctfarr = ctf.split("/");
 
 	new CBPlayer({
-		ctf: 'https://counterbalance.net/converter/index.php?playlist=' + ctfarr[1] + "/" + ctfarr[2] + CBPlayer.PLAYLIST_RSS_EXTENSION,
+		ctf: CBPlayer.PLAYLIST_BASE_URL + ctfarr[1] + "/" + ctfarr[2] + CBPlayer.PLAYLIST_RSS_EXTENSION,
 		el: 'myElement3',
 		autostart: 'false',
 		repeat: false,
@@ -56,7 +56,7 @@ function mediaWindowHtmlmin(ctf) {
 	var ctfarr = ctf.split("/");
 
 	new CBPlayer({
-		ctf: 'https://counterbalance.net/converter/index.php?playlist=' + ctfarr[1] + "/" + ctfarr[2] + CBPlayer.PLAYLIST_RSS_EXTENSION,
+		ctf: CBPlayer.PLAYLIST_BASE_URL + ctfarr[1] + "/" + ctfarr[2] + CBPlayer.PLAYLIST_RSS_EXTENSION,
 		el: 'myElementmin',
 		autostart: 'false',
 		repeat: false,
@@ -73,7 +73,7 @@ function audioWindowHtml(ctf) {
 	var ctfarr = ctf.split("/");
 
 	new CBPlayer({
-		ctf: 'https://counterbalance.net/converter/index.php?playlist=' + ctfarr[1] + "/" + ctfarr[2] + ".xml",
+		ctf: CBPlayer.PLAYLIST_BASE_URL + ctfarr[1] + "/" + ctfarr[2] + ".xml",
 		el: 'myElement',
 		autostart: 'false',
 		repeat: false,

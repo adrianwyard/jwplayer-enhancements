@@ -5,9 +5,7 @@
 
     define('JW_BASE_URL', 'https://cdn.jwplayer.com/manifests/');
 
-    define('CONVERTER_BASE_URL', '../converter');
-
-    define('VIDEO_MAP_URL', 'video-map.tsv');
+    define('VIDEO_MAP_URL', 'https://counterbalance.net/converter/video-map.tsv');
 
     define('PLAYLIST_BASE_URL', '../');
 

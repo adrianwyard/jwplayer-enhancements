@@ -120,7 +120,8 @@ class Converter{
          /**
          * Respond with json file
          */
-        include $jsonUrl; 
+        header('Content-Type: application/json');
+        die(file_get_contents($jsonUrl));
 
 
 
