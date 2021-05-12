@@ -181,10 +181,20 @@ class CBPlayer{
 	 * @param playlist The new playlist to be loaded
 	 */
 	__onPlayerPlaylist(playlist){
-		this.playlist = playlist;
+		this.testMode && console.log('playlist', playlist, this);
 	}
 
+	/**
+	 * Triggers `time`
+	 * Added this to prevent jumps in case the seek triggers
+	 * playlist next/previous
+	 * 
+	 * Added `this.isSeeking` handler to prevent duplicate 
+	 * calling of `time`.
+	 */
 	__onPlayerSeek({offset}){
+		this.testMode && console.log('seek', offset);
+
 		this.player.trigger('time', {position: offset});
 		this.isSeeking = true;
 	}
@@ -203,7 +213,11 @@ class CBPlayer{
 	 */
 	__onPlayerTime({position, offset}){
 
+		// Prevent duplicate call to this function
+		// when manually triggered by `seek`
 		if(this.isSeeking){
+			this.testMode && console.log('time isSeeking', position, offset);
+
 			this.player.trigger('seeked');
 			return;
 		}
@@ -215,8 +229,7 @@ class CBPlayer{
 
 		if(_pos > currPlaylist.end){
 
-			if(this.testMode)
-				console.log('time next', _pos, currPlaylist);
+			this.testMode && console.log('time next', _pos, currPlaylist, iPlaylist, this.playlist);
 
 			if(iPlaylist == this.playlist.length - 1){
 				this.player.seek(currPlaylist.sources[0].starttime);
@@ -248,12 +261,14 @@ class CBPlayer{
 		const startTime = this.player.getPlaylistItem().sources[0].starttime;
 		const endTime = this.player.getPlaylistItem().end;
 
-		if(this.testMode)
-			console.log('seeked', currPos, startTime, endTime);
 
 		if(currPos < startTime - 1 || currPos > endTime + 1){
+			this.testMode && console.log('seeked out', currPos, startTime, endTime);
+
 			this.player.seek(this.player.getPlaylistItem().sources[0].starttime);
 		}else{
+			this.testMode && console.log('seeked false', currPos, startTime, endTime);
+
 			this.isSeeking = false;
 		}
 	}
