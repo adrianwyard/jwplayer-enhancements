@@ -30,6 +30,21 @@ class Converter{
         }        
     }
 
+    /**
+     * Converts string `hh:mm:ss` or `mm:ss` to seconds
+     * 
+     * @return number
+     */
+    private static function __hour_to_seconds(string $hour){
+        [$time1, $time2, $time3] = explode(':', $hour);
+
+        if(isset($time3)){
+            return $time1 * 3600 + $time2 * 60 + $time3;
+        }
+
+        return $time1 * 60 + $time2;
+    }
+
     private static function aws_to_jw_filename(string $xmlFilename){
         return preg_replace('/(.*)\.xml$/', '$1.json', $xmlFilename);
     }
@@ -68,16 +83,12 @@ class Converter{
             ];
 
             if(!empty($attributes['start'])){
-                [$startMin, $startSec] = explode(':', $attributes['start']);
-
-                $item['starttime'] = $startMin * 60 + $startSec;
+                $item['starttime'] = self::__hour_to_seconds($attributes['start']);
 
             }
 
             if(!empty($attributes['duration'])){
-                [$endMin, $endSec] = explode(':', $attributes['duration']);
-
-                $item['end'] = $endMin * 60 + $endSec;
+                $item['end'] = self::__hour_to_seconds($attributes['duration']);
             }
 
             array_push($playlist, $item);
