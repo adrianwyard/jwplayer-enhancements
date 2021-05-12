@@ -149,10 +149,17 @@ class CBPlayer{
 			var currPlaylist = this.player.getPlaylistItem();
 
 			// Rails
-			this.domPreviousRail.style.width = (currPlaylist.sources[0].starttime /  meta.seekRange.end) * 100 + '%';
+			if(currPlaylist.sources[0].starttime){
+				this.domPreviousRail.style.width = (currPlaylist.sources[0].starttime /  meta.seekRange.end) * 100 + '%';
+			}else{
+				this.domPreviousRail.style.width = 0;
+			}
 
-
-			this.domNextRail.style.width = (1 - (currPlaylist.end / meta.seekRange.end)) * 100 + '%';
+			if(currPlaylist.end){
+				this.domNextRail.style.width = (1 - (currPlaylist.end / meta.seekRange.end)) * 100 + '%';
+			}else{
+				this.domNextRail.style.width = 0;
+			}
 
 
 			// Blocks
