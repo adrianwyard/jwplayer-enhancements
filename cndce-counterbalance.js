@@ -182,6 +182,8 @@ class CBPlayer{
 	 */
 	__onPlayerPlaylist(playlist){
 		this.testMode && console.log('playlist', playlist, this);
+		
+		this.playlist = playlist.playlist;
 	}
 
 	/**
