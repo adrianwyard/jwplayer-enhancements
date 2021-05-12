@@ -18,7 +18,7 @@
 
 <table>
   <tr>
-    <td colspan="2"><h1 >Sync Server (POC) 0.010 </h1></td> <td></td>   <td></td>   <td></td></tr>
+    <td colspan="2"><h1 >Sync Server (POC) 0.011 </h1></td> <td></td>   <td></td>   <td></td></tr>
   
   <tr>
     <td>Test Controls:</td></tr>
@@ -30,11 +30,11 @@
     <button  size="20" type="button" onclick="sendEchoText()">Edit&Echo</button></td></tr>
 
   <tr>
-    <td><hr></td><td></td><td>Local T-Code</td><td>Local T-Stamp</td> <td>Server T-Code</td></tr>
+    <td><hr></td><td></td><td>Video T-Code</td><td>Local Timer</td> <td>Server T-Code</td></tr>
  
   <tr>
     <td><button type="button" onclick="joinRoom()">Join Room</button>
-    <button type="button" onclick="newRoom()">Restart All</button>
+    <button type="button" onclick="zeroAll()">Zero All</button>
     <button type="button" onclick="videoSync()">Sync All</button></td> 
     <td></td>
     <td><input type="text" size="15" id="timeCode"  name="timeCode"></td>
@@ -61,65 +61,88 @@
 
 <script type="text/JavaScript">
 
-  // CHANGE BLOCK: Uncomment desired websocket connection. 
-  // Adrian Server:  
-  // const ws = new WebSocket("ws://ec2-18-237-232-102.us-west-2.compute.amazonaws.com:8082");
-  // Andreas AWS:
-  // const ws = new WebSocket("ws://52.90.223.117:8082");    // Current IP must be updated too.
-  // Testing on local host:
-  const ws = new WebSocket("ws://localhost:8082");
-  // CHANGE BLOCK END.
-  // TODO: Move change block to secure config file!!
+// CHANGE BLOCK: Uncomment desired websocket connection. 
+// Adrian Server:  
+// const ws = new WebSocket("ws://ec2-18-237-232-102.us-west-2.compute.amazonaws.com:8082");
+// Andreas AWS:
+// const ws = new WebSocket("ws://52.90.223.117:8082");    // Current IP must be updated too.
+// Testing on local host:
+const ws = new WebSocket("ws://localhost:8082");
+// CHANGE BLOCK END.
+// TODO: Move change block to secure config file!!
 
-  // Primary JSON data structures used to communicate over web socket.
-  let ClientData = {
-    "eventCode": "CD.eC",   // Action request from client sent to SyncServer.
-    "clientTimeCode":  -1,   // Value from JW api.
-    "clientTimeStamp": -1,   // Value from page stopwatch.
-    "sendText":"CD.sT",     // Use to sanity check socket connection.
-    }
-
-  let ServerData = {
-    "eventCode": "SD.eC",   // Typically same value as sent by client.
-    "serverTimeCode": -1,    // Either an echoed clientTimeCode or server's stopwatch timecode.
-    "echoText": "SD.eT",    // Result shown on screen in sanity checking.
-    }
-
-// Rough copy of server's class. Use to test performance.
-class StopWatch {
-  constructor () {
-    this.startTime = 1;
-    this.accumulatedRunTime = 1;    //   this.normalizedRunTime=0;
-    this.isRunning = false;
+// Primary JSON data structures used to communicate over web socket.
+let ClientData = {
+  "eventCode": "CD.eC",   // Action request from client sent to SyncServer.
+  "clientTimeCode":  -1,  // Value from JW Player api.     // rename --> JWPlayerTimeCode
+  "clientTimeStamp": -1,  // Value from page stopwatch.    // rename --> LocalTimer
+  "sendText":"CD.sT",     // Use to sanity check socket connection.
   }
 
-  start () {this.run();}
+let ServerData = {
+  "eventCode": "SD.eC",   // Typically same value as sent by client.
+  "serverTimeCode": -1,   // Either an echoed clientTimeCode or server's stopwatch timecode.
+  "echoText": "SD.eT",    // Result shown on screen in sanity checking.
+  "serverTimerIsRunning": false,  // Return current run state of stopwatch timer.
+  }
 
-  run () {
+
+class StopWatch {
+  // A real stopwatch can be repeatedly started and stopped, and as a result it shows a total running time.
+  // Similarly this stopwatch class can accumulate a total of the running time intervals.
+  // It also has a reset method sets accumulated total to a specific total time.
+
+  constructor () {
+    this.startTime = undefined;
+    this.totalRunTime = 0;    
+    this.isRunning = false;
+  }
+  
+  start () {
+    // Set the basis of next running time interval using system time. 
     if (!this.isRunning) {  // Ignore run event if already running.  
-      this.startTime = Date.now();
+      this.startTime = performance.now();
       this.isRunning = true;
     }};
 
-  stop () {                
+  stop () { 
+    // Calculate the amount of time since we last started and add to our total runtime.            
     if (this.isRunning) {   // Ignore stop event if not running.
-      this.accumulatedRunTime += Date.now()- this.startTime;
+      this.totalRunTime += performance.now()- this.startTime;
       this.isRunning = false;
     }};
 
   reset (timeVal) {
-    this.accumulatedRunTime = timeVal; // TODO: Add bounds check on timecode (0<=TC<=video length)
+    // Initialize stopwatch timer to 0 or an arbitrary point in video.
+    // TODO: Add bounds check on timeval (0<=TC<=video length)
+    this.startTime=undefined;
+    this.totalRunTime = timeVal; 
     this.isRunning = false;  
   };
 
   getRunTime () {
-    if (!this.isRunning){
-      return this.accumulatedRunTime;
-    }
+    let accTime;
+    if (this.isRunning) {  
+      // Get snapshot of run time, by adding  
+      accTime = this.totalRunTime+(performance.now() - this.startTime);
+      console.log("Get Time while isRunning");
+
+    } 
     else {
-      return (this.accumulatedRunTime==0) ? 0 :this.accumulatedRunTime+(Date.now() - this.startTime)/1000;
+      accTime = this.totalRunTime;
+      console.log("Get Time when not Running");
     }
+    return accTime;
   };
+
+  getTimeCode() {
+    return this.getRunTime()/1000;
+  };
+
+  getIsRunning() {
+    return this.isRunning;
+  };
+
 }
 
 jwplayer("myElement").setup({
@@ -140,110 +163,173 @@ jwplayer("myElement").setup({
 //jwplayer("myElement").seek(1);
 //jwplayer("myElement").play();
 
-    let sw = new StopWatch();
+let sw = new StopWatch();
 
-    // Initiate web socket connection to SyncServer.
-    ws.addEventListener("open", ()=>{
-      ClientData.eventCode="NEW";
-      ClientData.sendText="Hello All!";
-      ws.send(JSON.stringify(ClientData));
-    });
+// Initiate web socket connection to SyncServer.
+ws.addEventListener("open", ()=>{
+  ClientData.eventCode="NEW";
+  ClientData.sendText="Hello All!";
+  ws.send(JSON.stringify(ClientData));
+});
 
-    // Process new SyncServer message 
-    ws.addEventListener("message",({data}) =>{      
-      ServerData = JSON.parse(data);
-      data = ServerData.eventCode;
+//
+// Handle messages from SyncServer. 
+//
+ws.addEventListener("message",({data}) =>{      
+  ServerData = JSON.parse(data);
 
-      switch (ServerData.eventCode) {
-        case 'PLAY':
-          jwplayer("myElement").play();
-          document.getElementById("playState").value = ServerData.eventCode;
-          document.getElementById("serverStamp").value = ServerData.serverTimeCode;
-          document.getElementById("serverStamp").value = ServerData.serverTimeCode;
-          document.getElementById("serverStamp").value = ServerData.serverTimeCode;
-          break; 
-
-        case 'NEW':
-          jwplayer("myElement").seek(ServerData.serverTimeCode);
-          jwplayer("myElement").play();
-
-          document.getElementById("playState").value = ServerData.eventCode;
-          document.getElementById("echoText").value = ServerData.echoText;
-
-          document.getElementById("serverStamp").value = ServerData.serverTimeCode;            
-
-
-          break; 
-
-        case 'PAUSE':
-          jwplayer("myElement").pause();
-          document.getElementById("playState").value = ServerData.eventCode;
-                    document.getElementById("serverStamp").value = ServerData.serverTimeCode;
-
-          break;
-
-        case 'SYNCALL':
-          jwplayer("myElement").seek(ServerData.serverTimeCode);
-          document.getElementById("timeBox").value = ServerData.serverTimeCode;
-                    document.getElementById("serverStamp").value = ServerData.serverTimeCode;
-
-          jwplayer("myElement").pause();
-          jwplayer("myElement").play();
-          break;
-
-        default:
-          document.getElementById("echoText").value = ServerData.echoText;
-        }
-      });
- 
-    function sendMyText() {
-      ClientData.eventCode = "SENDTEXT";
-      ClientData.sendText = document.getElementById("myText").value;
-      ws.send(JSON.stringify(ClientData));
-    }
-
-    function sendEchoText() {
-      ClientData.eventCode = "ECHOTEXT";
-      ClientData.sendText = document.getElementById("echoText").value;
-      ws.send(JSON.stringify(ClientData));
-    }
-
-   function videoPlay() {
-      ClientData.eventCode = "PLAY";
-      ws.send(JSON.stringify(ClientData));
+  switch (ServerData.eventCode) {
+    case 'PLAY':
+      if (jwplayer("myElement").getState()=="paused") {
+        jwplayer("myElement").play();
+      }
+      document.getElementById("playState").value = ServerData.eventCode;
       sw.start();
-      document.getElementById("timeCode").value = jwplayer("myElement").getPosition();
-      document.getElementById("timeStamp").value = sw.getRunTime()/1000;
-    }
+      setTimerDisplays();
+      break; 
 
-   function videoPause() {
-      ClientData.eventCode = "PAUSE";
-      ws.send(JSON.stringify(ClientData));
+    case 'NEW':
+      jwplayer("myElement").seek(ServerData.serverTimeCode);
+      sw.reset(ServerData.serverTimeCode);
+      sw.start();
+
+      if (ServerData.serverTimerIsRunning == true) {
+      //  if (jwplayer("myElement").getState()!="play") {  
+          //TODO: Kludge if player not ready.. Handling all preplay states? Async video load?
+          // setTimeout(jwplayer("myElement").play(),60000);
+          jwplayer("myElement").play()
+      } // }
+
+      document.getElementById("echoText").value = ServerData.echoText;
+      setTimerDisplays();           
+      break; 
+
+    case 'JOIN':
+      jwplayer("myElement").seek(ServerData.serverTimeCode);
+      sw.reset(ServerData.serverTimeCode);
+      sw.start();
+
+      if (ServerData.serverTimerIsRunning == true) {
+        if (jwplayer("myElement").getState()=="paused") {  
+          //TODO: Kludge if player not ready.. Handling all preplay states? Async video load?
+          // setTimeout(jwplayer("myElement").play(),60000);
+         jwplayer("myElement").play();
+      }}
+
+      document.getElementById("echoText").value = ServerData.echoText;
+      setTimerDisplays();           
+      break; 
+
+    case 'PAUSE':
+      if (jwplayer("myElement").getState()=="playing") {
+        jwplayer("myElement").pause();
+      }
       sw.stop();
-    document.getElementById("timeCode").value = jwplayer("myElement").getPosition();
-    document.getElementById("timeStamp").value = sw.getRunTime()/1000;
+      setTimerDisplays();
+      document.getElementById("echoText").value =  ServerData.echoText;
+      break;
 
+    case 'SYNCALL':
+      jwplayer("myElement").seek(ServerData.serverTimeCode);
+      if (jwplayer("myElement").getState()=="paused") {
+        jwplayer("myElement").play();
+      }
+
+      sw.reset(ServerData.serverTimeCode);
+      setTimerDisplays();
+      break;
+
+    case 'ZEROALL':
+      if (jwplayer("myElement").getState()=="playing") {
+        jwplayer("myElement").pause();
+      }
+
+      jwplayer("myElement").seek(ServerData.serverTimeCode);
+
+      sw.reset(ServerData.serverTimeCode);
+      setTimerDisplays();
+      break;
+
+
+    default:
+      document.getElementById("echoText").value = ServerData.eventCode;
     }
+  });
 
-    function videoSync() {
-      ClientData.eventCode = "SYNCALL";
-      ClientData.clientTimeCode= jwplayer("myElement").getPosition();
-      let payload = JSON.stringify(ClientData);
-      ws.send(payload);
-    }
-    function joinRoom() {
-      ClientData.eventCode = "NEW";
-      let payload = JSON.stringify(ClientData);
-      ws.send(payload);
-    }
+//
+// SUPPORT FUNCTIONS
+//
+function setTimerDisplays () {
+  document.getElementById("timeCode").value = jwplayer("myElement").getPosition();
+  document.getElementById("timeStamp").value = sw.getTimeCode();
+  document.getElementById("serverStamp").value = ServerData.serverTimeCode;
+}
 
-    function newRoom () {
-      sw.reset(0);
-      jwplayer("myElement").seek(0);
+function sendMyText() {
+  ClientData.eventCode = "SENDTEXT";
+  ClientData.sendText = document.getElementById("myText").value;
 
-      document.getElementById("timeCode").value = jwplayer("myElement").getPosition();
-      document.getElementById("timeStamp").value = sw.getRunTime()/1000;
-    }
+  ws.send(JSON.stringify(ClientData));
+}
 
-  </script>
+function sendEchoText() {
+  ClientData.eventCode = "ECHOTEXT";
+  ClientData.sendText = document.getElementById("echoText").value;
+
+  ws.send(JSON.stringify(ClientData));
+}
+
+function videoPlay() {
+  ClientData.eventCode = "PLAY";
+  ClientData.clientTimeCode = jwplayer("myElement").getPosition;
+  ClientData.clientTimeStamp = sw.getTimeCode();
+  ClientData.sendText="N/A";
+
+  ws.send(JSON.stringify(ClientData));
+}
+
+function videoPause() {
+  ClientData.eventCode = "PAUSE";
+  ClientData.clientTimeCode = jwplayer("myElement").getPosition;
+  ClientData.clientTimeStamp = sw.getTimeCode();
+  ClientData.sendText="N/A";
+
+  ws.send(JSON.stringify(ClientData));
+}
+
+function joinRoom() {
+  ClientData.eventCode = "JOIN";
+  ClientData.clientTimeCode= undefined;
+  ClientData.clientTimeStamp = undefined;
+  ClientData.sendText = "N/A";
+
+  ws.send(JSON.stringify(ClientData));
+}
+
+function videoSync() {
+  // Reset timers and video on all clients to this client's timecode.
+  // Automatically resume video playing for all.
+  // Action steps occur in server and client handlers for this eventCode.  
+  ClientData.eventCode = "SYNCALL";
+  ClientData.clientTimeCode = jwplayer("myElement").getPosition(); //  Math.trunc(jwplayer("myElement").getPosition()*100);
+  ClientData.clientTimeStamp = sw.getTimeCode();
+  ClientData.sendText="N/A";
+
+  setTimerDisplays();
+  ws.send(JSON.stringify(ClientData));
+}
+
+
+function zeroAll () {
+  // Reset timers and video to 0 seconds for all clients. Pause all video playing.
+  // Action steps occur in server and client handlers for this eventCode.  
+  ClientData.eventCode = "ZEROALL";
+  ClientData.clientTimeCode= 0;
+  ClientData.clientTimeStamp = sw.getTimeCode();
+  ClientData.sendText = "N/A";
+
+  ws.send(JSON.stringify(ClientData));
+}
+
+</script>
 
