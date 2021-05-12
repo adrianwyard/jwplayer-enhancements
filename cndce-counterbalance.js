@@ -15,6 +15,7 @@ class CBPlayer{
 	domNextRail;
 
 	isSeeking = false;
+	repeat;
 	testMode;
 
 	
@@ -24,7 +25,12 @@ class CBPlayer{
 		testMode = false,
 		...jwParams
 	}){
+		const {
+			repeat = false
+		} = jwParams
+
 		this.testMode = testMode;
+		this.repeat = repeat;
 
 		this.__initDOMPlayer(el);
 		this.__initPlayer(ctf, jwParams);
@@ -233,7 +239,7 @@ class CBPlayer{
 
 			this.testMode && console.log('time next', _pos, currPlaylist, iPlaylist, this.playlist);
 
-			if(iPlaylist == this.playlist.length - 1){
+			if(!this.repeat && iPlaylist == this.playlist.length - 1){
 				this.player.seek(currPlaylist.sources[0].starttime);
 				this.player.stop();
 			}else{
