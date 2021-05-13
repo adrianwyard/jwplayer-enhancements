@@ -1,3 +1,5 @@
+// Sync Server (POC) 0.014 
+
 // Create a html server on port 5000.
 var http = require('http');
 var fs = require('fs');
@@ -34,7 +36,7 @@ class StopWatch {
   // It also has a reset method sets accumulated total to a specific total time.
 
   constructor () {
-    this.startTime = undefined;
+    this.startTime = 0;
     this.totalRunTime = 0;    
     this.isRunning = false;
   }
@@ -105,25 +107,32 @@ wss.on('connection', (ws)=> {
     ClientData = JSON.parse(data);       
 
     console.log("Message", JSON.stringify(ClientData, null,2));
+    
+    // Handle communication 1-1 with sender.
+    if (ClientData.eventCode=="NEW" ||  ClientData.eventCode=="JOIN")  {
 
-    // For 'NEW' event, return message, only to sender.
-    if (ClientData.eventCode=="NEW" || ClientData.eventCode=="JOIN"){ 
- 
-      if (!sw.isRunning & connCounter==1) {   // First time start of video, then start sw.
+      // For 'NEW' event, return message, only to sender.
+      if (ClientData.eventCode=="NEW")  { 
+        if (!sw.isRunning && connCounter==1) {   // First time start of video, then start sw.
           sw.start();
-          console.log("Server Timer start");
+        }
+        ServerData.echoText = "Welcome New";
+      }
+
+      if (ClientData.eventCode=="JOIN") { 
+          ServerData.echoText = "Joined Room";
       }
 
       ServerData.eventCode = ClientData.eventCode;
       ServerData.serverTimeCode = sw.getTimeCode();    
-      ServerData.echoText = ((ClientData.eventCode=="NEW") ? "Welcome New" : "Joined Room");
       ServerData.serverTimerIsRunning = sw.getIsRunning();
-    
+      
       ws.send(JSON.stringify(ServerData)); 
-
-    console.log("Message", JSON.stringify(ServerData, null,2));
+      console.log("Message", JSON.stringify(ServerData, null,2));
     }
-    // For all other events, return a message to everyone.
+
+    
+    // Handle fan out communication and message everyone, 1-n.
     else {
       // Set event specific paramenters.
       switch (ClientData.eventCode) {
@@ -133,9 +142,12 @@ wss.on('connection', (ws)=> {
         case "PAUSE":
           sw.stop();
           break;
-        case "SYNCALL":
+        case "SYNCPLAY":
           sw.reset(ClientData.clientTimeCode*1000);
           sw.start();
+          break;
+        case "SYNCALL":
+          sw.reset(ClientData.clientTimeCode*1000);
           break;
         case "ZEROALL":
           sw.reset(ClientData.clientTimeCode);
@@ -156,7 +168,7 @@ wss.on('connection', (ws)=> {
       });
     }
 
-console.log("JSON", ClientData.eventCode, ClientData.clientTimeStamp);
+      console.log("JSON", ClientData.eventCode, ClientData.clientTimeStamp);
     });
 
     ws.on("close",()=>{

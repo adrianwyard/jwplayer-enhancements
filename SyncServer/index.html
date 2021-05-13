@@ -18,35 +18,60 @@
 
 <table>
   <tr>
-    <td colspan="2"><h1 >Sync Server (POC) 0.011 </h1></td> <td></td>   <td></td>   <td></td></tr>
+    <td colspan="2"><h1 >Sync Server (POC) 0.014 </h1></td> <td></td>   <td></td>   <td></td></tr>
   
   <tr>
     <td>Test Controls:</td></tr>
-  
-  <tr>
-    <td colspan="2"><input type="text" id="myText" name="myText" value="new msg">
-    <button size="20" type="button" onclick="sendMyText()">Send New</button></td>
-    <td colspan="2"><input type="text" size="50" id="echoText" name="echoText" value="NoSocket">
-    <button  size="20" type="button" onclick="sendEchoText()">Edit&Echo</button></td></tr>
 
   <tr>
-    <td><hr></td><td></td><td>Video T-Code</td><td>Local Timer</td> <td>Server T-Code</td></tr>
- 
+    <td colspan="2"><input type="text" id="myText" name="myText" value="new msg">
+    <button size="20" type="button" onclick="sendMyText()">Send New</button>
+    <input type="text" size="50" id="echoText" name="echoText" value="NoSocket">
+    <button  size="20" type="button" onclick="sendEchoText()">Edit&Echo</button></td></tr>
+<hr>
   <tr>
     <td><button type="button" onclick="joinRoom()">Join Room</button>
     <button type="button" onclick="zeroAll()">Zero All</button>
-    <button type="button" onclick="videoSync()">Sync All</button></td> 
-    <td></td>
-    <td><input type="text" size="15" id="timeCode"  name="timeCode"></td>
-    <td><input type="text" size="15" id="timeStamp" name="timeStamp"></td>
-    <td><input type="text" size="15" id="serverStamp" name="serverStamp"></td></tr>
-      
+    <button type="button" onclick="syncAll()">Sync All</button>
+      <button type="button" onclick="syncPlay()">Scrub-n-Play</button></td> 
   <tr>
     <td><button type="button" onclick="videoPlay()">Play</button>
     <button type="button" onclick="videoPause()">Pause</button>
     <input size="10" type="text" id="playState" name="playState"></td></tr>
 
 </table>
+
+<hr>
+
+<table  border "2px solid black" width="300px" >
+	<col style="width:30%">
+	<col style="width:35%">
+	<col style="width:35%">
+  <thead>
+    <tr>
+      <th >Timer</th>
+      <th>Seconds</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Local T-Code</td>
+      <td><input type="text" size="25" id="timeCode"  name="timeCode"></td>
+    </tr>
+ <!--   <tr>
+      <td hidden >Local Timer</td>
+      <td><input type="text" size="25" id="timeStamp" name="timeStamp"></td>
+    </tr>
+-->
+    <tr>
+      <td>Server Timer</td>
+      <td><input type="text" size="25" id="serverStamp" name="serverStamp"></td>
+    </tr>
+  </tbody>
+</table>
+
+
+<hr>
 
 <table>
   <tr>
@@ -58,6 +83,8 @@
     </td></tr>
 
 </table>
+</body>
+</html>
 
 <script type="text/JavaScript">
 
@@ -65,9 +92,9 @@
 // Adrian Server:  
 // const ws = new WebSocket("ws://ec2-18-237-232-102.us-west-2.compute.amazonaws.com:8082");
 // Andreas AWS:
-// const ws = new WebSocket("ws://52.90.223.117:8082");    // Current IP must be updated too.
+const ws = new WebSocket("ws://3.80.109.107:8082");    // Current IP must be updated too.
 // Testing on local host:
-const ws = new WebSocket("ws://localhost:8082");
+// const ws = new WebSocket("ws://localhost:8082");
 // CHANGE BLOCK END.
 // TODO: Move change block to secure config file!!
 
@@ -156,13 +183,6 @@ jwplayer("myElement").setup({
   //mute: false,   volume: 80,
 });
 
-//jwplayer("myElement").on('ready');
-//jwplayer("myElement").resize(480, 470);
-//jwplayer("myElement").play(false);
-//Related to sticky play issue.
-//jwplayer("myElement").seek(1);
-//jwplayer("myElement").play();
-
 let sw = new StopWatch();
 
 // Initiate web socket connection to SyncServer.
@@ -179,26 +199,36 @@ ws.addEventListener("message",({data}) =>{
   ServerData = JSON.parse(data);
 
   switch (ServerData.eventCode) {
+    case 'SENDTEXT':
+      document.getElementById("echoText").value = ServerData.echoText; 
+      break;
+
+    case 'ECHOTEXT':
+      document.getElementById("echoText").value = ServerData.echoText; 
+      break;
+
     case 'PLAY':
       if (jwplayer("myElement").getState()=="paused") {
         jwplayer("myElement").play();
       }
-      document.getElementById("playState").value = ServerData.eventCode;
+
       sw.start();
+
+      document.getElementById("playState").value = ServerData.eventCode;
       setTimerDisplays();
       break; 
 
     case 'NEW':
       jwplayer("myElement").seek(ServerData.serverTimeCode);
       sw.reset(ServerData.serverTimeCode);
-      sw.start();
-
+ 
       if (ServerData.serverTimerIsRunning == true) {
-      //  if (jwplayer("myElement").getState()!="play") {  
-          //TODO: Kludge if player not ready.. Handling all preplay states? Async video load?
-          // setTimeout(jwplayer("myElement").play(),60000);
-          jwplayer("myElement").play()
-      } // }
+        if (jwplayer("myElement").getState()!="play") {  
+        //TODO: Kludge if player not ready.. Handling all preplay states? Async video load?
+        // setTimeout(jwplayer("myElement").play(),60000);
+        jwplayer("myElement").play()
+        sw.start();     
+      }  }
 
       document.getElementById("echoText").value = ServerData.echoText;
       setTimerDisplays();           
@@ -207,16 +237,15 @@ ws.addEventListener("message",({data}) =>{
     case 'JOIN':
       jwplayer("myElement").seek(ServerData.serverTimeCode);
       sw.reset(ServerData.serverTimeCode);
-      sw.start();
 
       if (ServerData.serverTimerIsRunning == true) {
         if (jwplayer("myElement").getState()=="paused") {  
-          //TODO: Kludge if player not ready.. Handling all preplay states? Async video load?
-          // setTimeout(jwplayer("myElement").play(),60000);
-         jwplayer("myElement").play();
+
+          jwplayer("myElement").play();
+       //   sw.start();         
       }}
 
-      document.getElementById("echoText").value = ServerData.echoText;
+      document.getElementById("playState").value = ServerData.eventCode;
       setTimerDisplays();           
       break; 
 
@@ -225,19 +254,36 @@ ws.addEventListener("message",({data}) =>{
         jwplayer("myElement").pause();
       }
       sw.stop();
+
+      document.getElementById("playState").value = ServerData.eventCode;
       setTimerDisplays();
-      document.getElementById("echoText").value =  ServerData.echoText;
       break;
 
     case 'SYNCALL':
+      jwplayer("myElement").seek(ServerData.serverTimeCode);
+ 
+      if (jwplayer("myElement").getState()=="playing") {
+        jwplayer("myElement").pause();
+      }
+
+      sw.reset(ServerData.serverTimeCode);
+
+      document.getElementById("playState").value = ServerData.eventCode;
+      setTimerDisplays();
+      break;
+
+    case 'SYNCPLAY':
       jwplayer("myElement").seek(ServerData.serverTimeCode);
       if (jwplayer("myElement").getState()=="paused") {
         jwplayer("myElement").play();
       }
 
       sw.reset(ServerData.serverTimeCode);
+
+      document.getElementById("playState").value = ServerData.eventCode;
       setTimerDisplays();
       break;
+
 
     case 'ZEROALL':
       if (jwplayer("myElement").getState()=="playing") {
@@ -245,15 +291,16 @@ ws.addEventListener("message",({data}) =>{
       }
 
       jwplayer("myElement").seek(ServerData.serverTimeCode);
-
       sw.reset(ServerData.serverTimeCode);
+
+      document.getElementById("playState").value = ServerData.eventCode;
       setTimerDisplays();
       break;
 
 
     default:
-      document.getElementById("echoText").value = ServerData.eventCode;
-    }
+      document.getElementById("playState").value = ServerData.eventCode;
+      setTimerDisplays();    }
   });
 
 //
@@ -261,7 +308,7 @@ ws.addEventListener("message",({data}) =>{
 //
 function setTimerDisplays () {
   document.getElementById("timeCode").value = jwplayer("myElement").getPosition();
-  document.getElementById("timeStamp").value = sw.getTimeCode();
+  // document.getElementById("timeStamp").value = sw.getTimeCode();
   document.getElementById("serverStamp").value = ServerData.serverTimeCode;
 }
 
@@ -281,8 +328,8 @@ function sendEchoText() {
 
 function videoPlay() {
   ClientData.eventCode = "PLAY";
-  ClientData.clientTimeCode = jwplayer("myElement").getPosition;
-  ClientData.clientTimeStamp = sw.getTimeCode();
+ // ClientData.clientTimeCode = jwplayer("myElement").getPosition;
+ // ClientData.clientTimeStamp = sw.getTimeCode();
   ClientData.sendText="N/A";
 
   ws.send(JSON.stringify(ClientData));
@@ -290,8 +337,8 @@ function videoPlay() {
 
 function videoPause() {
   ClientData.eventCode = "PAUSE";
-  ClientData.clientTimeCode = jwplayer("myElement").getPosition;
-  ClientData.clientTimeStamp = sw.getTimeCode();
+ // ClientData.clientTimeCode = jwplayer("myElement").getPosition;
+ // ClientData.clientTimeStamp = sw.getTimeCode();
   ClientData.sendText="N/A";
 
   ws.send(JSON.stringify(ClientData));
@@ -299,33 +346,44 @@ function videoPause() {
 
 function joinRoom() {
   ClientData.eventCode = "JOIN";
-  ClientData.clientTimeCode= undefined;
-  ClientData.clientTimeStamp = undefined;
+ // ClientData.clientTimeCode= -1;
+// ClientData.clientTimeStamp = -1;
   ClientData.sendText = "N/A";
 
   ws.send(JSON.stringify(ClientData));
 }
 
-function videoSync() {
-  // Reset timers and video on all clients to this client's timecode.
-  // Automatically resume video playing for all.
+function syncAll() {
+  // Reset timers and video on all clients to this client's timecode e.g. after scrubbing.
   // Action steps occur in server and client handlers for this eventCode.  
   ClientData.eventCode = "SYNCALL";
   ClientData.clientTimeCode = jwplayer("myElement").getPosition(); //  Math.trunc(jwplayer("myElement").getPosition()*100);
-  ClientData.clientTimeStamp = sw.getTimeCode();
+//  ClientData.clientTimeStamp = sw.getTimeCode();
   ClientData.sendText="N/A";
 
   setTimerDisplays();
   ws.send(JSON.stringify(ClientData));
 }
 
+function syncPlay() {
+  // Reset timers and video on all clients to this client's timecode.
+  // Automatically resume video playing for all.
+  // Action steps occur in server and client handlers for this eventCode.  
+  ClientData.eventCode = "SYNCPLAY";
+  ClientData.clientTimeCode = jwplayer("myElement").getPosition(); //  Math.trunc(jwplayer("myElement").getPosition()*100);
+//  ClientData.clientTimeStamp = sw.getTimeCode();
+  ClientData.sendText="N/A";
+
+  setTimerDisplays();
+  ws.send(JSON.stringify(ClientData));
+}
 
 function zeroAll () {
   // Reset timers and video to 0 seconds for all clients. Pause all video playing.
   // Action steps occur in server and client handlers for this eventCode.  
   ClientData.eventCode = "ZEROALL";
   ClientData.clientTimeCode= 0;
-  ClientData.clientTimeStamp = sw.getTimeCode();
+ // ClientData.clientTimeStamp = sw.getTimeCode();
   ClientData.sendText = "N/A";
 
   ws.send(JSON.stringify(ClientData));
