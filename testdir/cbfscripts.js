@@ -1,6 +1,6 @@
 function mediaWindowHtml(ctf) {
 
-	document.write('<center><div id="myElement">Loading the player...</div></center>');
+	document.write('<center><div id="myElement"></div></center>');
 
 	var ctfarr = ctf.split("/");
 
@@ -17,7 +17,7 @@ function mediaWindowHtml(ctf) {
 
 function mediaWindowHtml2(ctf) {
 
-	document.write('<center><div id="myElement2">Loading the player...</div></center>');
+	document.write('<center><div id="myElement2"></div></center>');
 
 	var ctfarr = ctf.split("/");
 
@@ -34,7 +34,7 @@ function mediaWindowHtml2(ctf) {
 
 function mediaWindowHtml3(ctf) {
 
-	document.write('<center><div id="myElement3">Loading the player...</div></center>');
+	document.write('<center><div id="myElement3"></div></center>');
 
 	var ctfarr = ctf.split("/");
 
@@ -43,7 +43,27 @@ function mediaWindowHtml3(ctf) {
 		el: 'myElement3',
 		autostart: 'false',
 		repeat: false,
-		height: 340,
+		height: 324,
+		width: 720
+	})
+
+}
+
+function mediaWindowHtmlShelf(ctf) {
+
+	document.write('<center><div id="myElement1"></div></center>');
+
+	var ctfarr = ctf.split("/");
+
+	new CBPlayer({
+		ctf: CBPlayer.PLAYLIST_BASE_URL + ctfarr[1] + "/" + ctfarr[2] + CBPlayer.PLAYLIST_RSS_EXTENSION,
+		el: 'myElement1',
+		autostart: 'false',
+		related: {
+			displayMode: "shelfWidget"
+		},
+		repeat: false,
+		height: 405,
 		width: 720
 	})
 
@@ -51,7 +71,7 @@ function mediaWindowHtml3(ctf) {
 
 function mediaWindowHtmlmin(ctf) {
 
-	document.write('<center><div id="myElementmin">Loading the player...</div></center>');
+	document.write('<center><div id="myElementmin"></div></center>');
 
 	var ctfarr = ctf.split("/");
 
@@ -68,7 +88,7 @@ function mediaWindowHtmlmin(ctf) {
 
 function audioWindowHtml(ctf) {
 
-	document.write('<center><div id="myElement">Loading the player...</div></center>');
+	document.write('<center><div id="myElement"></div></center>');
 
 	var ctfarr = ctf.split("/");
 
