@@ -78,9 +78,12 @@ class Converter{
         foreach ($playlistXML->channel->item as $playlistItem) {
             $attributes = $playlistItem->children('media', true)->attributes();
 
-            $item = [
-                'file'      => self::aws_to_jw_url($attributes['url'])
-            ];
+            $item = array_merge(
+                json_decode(json_encode($playlistItem), true),
+                [
+                    'file'  => self::aws_to_jw_url($attributes['url'])
+                ]
+            );
 
             if(!empty($attributes['start'])){
                 $item['starttime'] = self::__hour_to_seconds($attributes['start']);
