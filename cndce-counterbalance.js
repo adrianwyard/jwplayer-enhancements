@@ -47,6 +47,8 @@ class CBPlayer{
 
 			document.body.append(this.domPlayer);
 		}
+
+		this.domPlayer.classList.add('cndce-jwplayer');
 	}
 
 	__initPlayer(ctf, params = {}){
@@ -138,6 +140,10 @@ class CBPlayer{
 
 		// Add additional rail elements
 		this.__initAddtlRails();
+
+		// Add class `cndce-jwplayer`
+		this.domPlayer.classList.add('cndce-jwplayer');
+
 
 	}
 
