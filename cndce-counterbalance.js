@@ -235,24 +235,28 @@ class CBPlayer{
 
 		const _pos = offset ? offset : position;
 
+		const {
+			starttime = 0
+		} = currPlaylist.sources[0];
+
 		if(_pos > currPlaylist.end){
 
 			this.testMode && console.log('time next', _pos, currPlaylist, iPlaylist, this.playlist);
 
 			if(!this.repeat && iPlaylist == this.playlist.length - 1){
-				this.player.seek(currPlaylist.sources[0].starttime);
+				this.player.seek(starttime);
 				this.player.stop();
 			}else{
 				this.player.next();
 				this.player.trigger('seeked');
 			}
-		}else if(_pos < currPlaylist.sources[0].starttime - 2){
+		}else if(_pos < starttime - 2){
 			if(this.testMode)
 				console.log('time prev', _pos, currPlaylist);
 
 			
 			if(iPlaylist == 0){
-				this.player.seek(currPlaylist.sources[0].starttime);
+				this.player.seek(starttime);
 				this.player.trigger('seeked');
 			}else{
 				this.player.playlistItem(iPlaylist - 1);
@@ -266,14 +270,14 @@ class CBPlayer{
 
 	__onPlayerSeeked(){
 		const currPos = this.player.getPosition();
-		const startTime = this.player.getPlaylistItem().sources[0].starttime;
+		const {startTime = 0} = this.player.getPlaylistItem().sources[0];
 		const endTime = this.player.getPlaylistItem().end;
 
 
 		if(currPos < startTime - 1 || currPos > endTime + 1){
 			this.testMode && console.log('seeked out', currPos, startTime, endTime);
 
-			this.player.seek(this.player.getPlaylistItem().sources[0].starttime);
+			this.player.seek(startTime);
 		}else{
 			this.testMode && console.log('seeked false', currPos, startTime, endTime);
 
