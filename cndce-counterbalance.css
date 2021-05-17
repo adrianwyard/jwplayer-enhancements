@@ -68,3 +68,39 @@
 .cndce-jwplayer .jw-svg-icon-buffer {
 	display: none;
 }
+
+
+/* Shelf Widget */
+.cndce-jwplayer ~ .jw-shelf-widget .jw-related-shelf{
+	font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.cndce-jwplayer ~ .jw-shelf-widget .jw-related-more{
+	visibility: hidden;
+}
+
+.cndce-jwplayer ~ .jw-shelf-widget .jw-related-shelf-item-image{
+	display: none;
+}
+
+.cndce-jwplayer ~ .jw-shelf-widget .jw-related-shelf-item .jw-related-shelf-item-contents{
+	margin: 0;
+}
+
+.cndce-jwplayer ~ .jw-shelf-widget .jw-related-shelf-item{
+	background: white;
+    margin: 0 0.3rem;
+	padding: 0.5rem 0.7rem;
+}
+
+.cndce-jwplayer ~ .jw-shelf-widget .jw-related-control{
+	margin: 0;
+}
+
+.cndce-jwplayer ~ .jw-shelf-widget .jw-related-control-left{
+	margin-right: 0.7rem;
+}
+
+.cndce-jwplayer ~ .jw-shelf-widget .jw-related-control-right{
+	margin-left: 0.8rem;
+}
