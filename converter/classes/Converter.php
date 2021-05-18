@@ -117,13 +117,13 @@ class Converter{
 
         $jsonUrl = PLAYLIST_BASE_URL. $playlistFilenameJson;
 
-
+        
         
         /**
          * Look for existing JSON file.
          * If none exists, create one
          */
-         if(!array_search($playlistFilenameJson, scandir(PLAYLIST_BASE_URL))){
+         if(!file_exists($jsonUrl)){
             file_put_contents(
                 $jsonUrl,
                 json_encode(self::aws_to_jw_data($awsUrl))
