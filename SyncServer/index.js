@@ -1,4 +1,5 @@
-// Sync Server (POC) 0.014 
+// Sync Server (POC) 0.015 
+console.log("Sync Server .016");
 
 // Create a html server on port 5000.
 var http = require('http');
@@ -9,6 +10,17 @@ http.createServer(function (req, res) {
   res.writeHead(200, {'Content-Type': 'text/html'});
   res.end(index);
 }).listen(5000);
+
+/*
+var static = require('node-static');
+var http = require('http');
+
+var file = new(static.Server)(__dirname);
+
+http.createServer(function (req, res) {
+  file.serve(req, res);
+}).listen(5000);
+*/
 
 // Create websocket server on Port 8082 
 // Based off sample at https://github.com/websockets/ws 
@@ -173,6 +185,10 @@ wss.on('connection', (ws)=> {
 
     ws.on("close",()=>{
         console.log("Client  disconnected. Total connections=", --connCounter);
+        if (connCounter==0) {
+          sw.stop();
+          sw.reset(0);
+        }
     });
 
 });
