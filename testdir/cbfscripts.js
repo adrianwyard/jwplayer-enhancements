@@ -4,7 +4,7 @@ function mediaWindowHtml(ctf) {
 
 	var ctfarr = ctf.split("/");
 
-	new CBPlayer({
+	return new CBPlayer({
 		ctf: CBPlayer.PLAYLIST_BASE_URL + ctfarr[1] + "/" + ctfarr[2] + CBPlayer.PLAYLIST_RSS_EXTENSION,
 		el: 'myElement',
 		autostart: 'false',
@@ -21,7 +21,7 @@ function mediaWindowHtml2(ctf) {
 
 	var ctfarr = ctf.split("/");
 
-	new CBPlayer({
+	return new CBPlayer({
 		ctf: CBPlayer.PLAYLIST_BASE_URL + ctfarr[1] + "/" + ctfarr[2] + CBPlayer.PLAYLIST_RSS_EXTENSION,
 		el: 'myElement2',
 		autostart: 'false',
@@ -38,7 +38,7 @@ function mediaWindowHtml3(ctf) {
 
 	var ctfarr = ctf.split("/");
 
-	new CBPlayer({
+	return new CBPlayer({
 		ctf: CBPlayer.PLAYLIST_BASE_URL + ctfarr[1] + "/" + ctfarr[2] + CBPlayer.PLAYLIST_RSS_EXTENSION,
 		el: 'myElement3',
 		autostart: 'false',
@@ -55,7 +55,7 @@ function mediaWindowHtmlShelf(ctf) {
 
 	var ctfarr = ctf.split("/");
 
-	new CBPlayer({
+	return new CBPlayer({
 		ctf: CBPlayer.PLAYLIST_BASE_URL + ctfarr[1] + "/" + ctfarr[2] + CBPlayer.PLAYLIST_RSS_EXTENSION,
 		el: 'myElement1',
 		autostart: 'false',
@@ -75,7 +75,7 @@ function mediaWindowHtmlmin(ctf) {
 
 	var ctfarr = ctf.split("/");
 
-	new CBPlayer({
+	return new CBPlayer({
 		ctf: CBPlayer.PLAYLIST_BASE_URL + ctfarr[1] + "/" + ctfarr[2] + CBPlayer.PLAYLIST_RSS_EXTENSION,
 		el: 'myElementmin',
 		autostart: 'false',
@@ -92,7 +92,7 @@ function audioWindowHtml(ctf) {
 
 	var ctfarr = ctf.split("/");
 
-	new CBPlayer({
+	return new CBPlayer({
 		ctf: CBPlayer.PLAYLIST_BASE_URL + ctfarr[1] + "/" + ctfarr[2] + ".xml",
 		el: 'myElement',
 		autostart: 'false',
