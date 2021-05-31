@@ -65,6 +65,7 @@ class CBPlayer{
 		this.player.on('seek', this.__onPlayerSeek.bind(this));
 		this.player.on('time', this.__onPlayerTime.bind(this));
 		this.player.on('seeked', this.__onPlayerSeeked.bind(this));
+		this.player.on('playlistItem', this.__onPlayerPlaylistItem.bind(this));
 	}
 
 	/**
@@ -289,5 +290,19 @@ class CBPlayer{
 
 			this.isSeeking = false;
 		}
+	}
+
+	/**
+	 * Called when a player changes playlist item.
+	 * 
+	 * Updates the starttime of the new playlist
+	 */
+	__onPlayerPlaylistItem({index, item}){
+		const {
+			starttime = 0
+		} = item.sources[0];
+
+		this.testMode && console.log('playlist item', item, starttime);
+		this.player.seek(starttime);
 	}
 }
