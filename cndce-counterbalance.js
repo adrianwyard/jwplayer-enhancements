@@ -32,6 +32,8 @@ class CBPlayer{
 		this.testMode = testMode;
 		this.repeat = repeat;
 
+		this.testMode && (window.cbPlayer = this);
+
 		this.__initDOMPlayer(el);
 		this.__initPlayer(ctf, jwParams);
 	}
@@ -85,8 +87,7 @@ class CBPlayer{
 			this.domPlayer.classList.remove('prev-block-hover');
 		}
 		this.domPreviousRailBlock.onclick = ()=>{
-			this.isSeeking = false;
-			this.player.trigger('seek', {offset: 0})
+			this.player.playlistPrev();
 		}
 
 		this.domNextRailBlock = document.createElement('div');
@@ -100,8 +101,7 @@ class CBPlayer{
 			this.domPlayer.classList.remove('next-block-hover');
 		}
 		this.domNextRailBlock.onclick = ()=>{
-			this.isSeeking = false;
-			this.player.trigger('seek', {offset: this.player.getDuration()});
+			this.player.next();
 		}
 
 		this.domControlBar.prepend(this.domPreviousRailBlock);
@@ -267,7 +267,7 @@ class CBPlayer{
 				this.player.trigger('seeked');
 			}else{
 				this.player.playlistItem(iPlaylist - 1);
-				this.player.trigger('seeked');
+				// this.player.trigger('seeked');
 			}
 		}else{
 			if(this.testMode)
@@ -278,15 +278,16 @@ class CBPlayer{
 	__onPlayerSeeked(){
 		const currPos = this.player.getPosition();
 		const {startTime = 0} = this.player.getPlaylistItem().sources[0];
-		const endTime = this.player.getPlaylistItem().end;
+
+		const {end = this.player.getDuration()} = this.player.getPlaylistItem();
 
 
-		if(currPos < startTime - 1 || currPos > endTime + 1){
-			this.testMode && console.log('seeked out', currPos, startTime, endTime);
+		if(currPos < startTime - 1 || currPos > end + 1){
+			this.testMode && console.log('seeked out', currPos, startTime, end);
 
 			this.player.seek(startTime);
 		}else{
-			this.testMode && console.log('seeked false', currPos, startTime, endTime);
+			this.testMode && console.log('seeked false', currPos, startTime, end);
 
 			this.isSeeking = false;
 		}
@@ -303,6 +304,9 @@ class CBPlayer{
 		} = item.sources[0];
 
 		this.testMode && console.log('playlist item', item, starttime);
-		this.player.seek(starttime);
+		this.isSeeking = true;
+		this.player.once('play', (function(){
+			this.player.seek(starttime);
+		}).bind(this))
 	}
 }
