@@ -9,8 +9,8 @@ function mediaWindowHtml(ctf) {
 		el: 'myElement',
 		autostart: 'false',
 		repeat: false,
-		height: 330,
-		width: 440
+		height: 300,
+		width: 400
 	})
 
 }
@@ -26,8 +26,8 @@ function mediaWindowHtml2(ctf) {
 		el: 'myElement2',
 		autostart: 'false',
 		repeat: false,
-		height: 330,
-		width: 440
+		height: 300,
+		width: 400
 	})
 
 }
@@ -80,8 +80,8 @@ function mediaWindowHtmlmin(ctf) {
 		el: 'myElementmin',
 		autostart: 'false',
 		repeat: false,
-		height: 330,
-		width: 440
+		height: 300,
+		width: 400
 	})
 
 }
