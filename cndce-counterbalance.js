@@ -1,6 +1,9 @@
+
+
+
 class CBPlayer{
-	static PLAYLIST_BASE_URL = 'https://counterbalance.net/converter/index.php?playlist=';
-	static PLAYLIST_RSS_EXTENSION = '-dvh.xml';
+	static get PLAYLIST_BASE_URL(){ return 'https://counterbalance.net/converter/index.php?playlist='};
+	static get PLAYLIST_RSS_EXTENSION(){return '-dvh.xml'};
 
 	player;
 	playlist;
